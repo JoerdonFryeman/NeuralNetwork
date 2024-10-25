@@ -130,30 +130,32 @@ class InputLayer(LayerBuilder):
     Выполняет начальную обработку входных данных, применяя указанную активационную функцию.
     """
 
-    def __init__(self, input_dataset: list[int | float], activation_function):
+    def __init__(self, input_dataset: list[int | float], activation_function_first, activation_function_second):
         """
         Инициализирует входной слой.
         :param input_dataset: Список входных данных.
-        :param activation_function: Функция активации для слоя.
+        :param activation_function_first: Функция активации первого нейрона.
+        :param activation_function_second: Функция активации второго нейрона.
         """
         if self._test_mode:
             seed(0)
         self.input_dataset = input_dataset
         self.__neuron_number = 2
         self.bias = uniform(-0.5, 0.5)
-        self.switch_list = [False, True]
-        self.activation_function = activation_function
+        self.switch_list = [True, True]
+        self.activation_function_first = activation_function_first
+        self.activation_function_second = activation_function_second
 
     def get_layer_dataset(self) -> list[float]:
         """
         Получает массив данных слоя с примененной активационной функцией.
         :return: Список значений после применения активационной функции.
         """
-        result_negative, result_positive = self._calculate_neuron_dataset(
+        neuron_data_first, neuron_data_second = self._calculate_neuron_dataset(
             self.input_dataset, self.__neuron_number, self.bias, self.switch_list
         )
         logger.debug(self)
-        return [self.activation_function(result_negative), self.activation_function(result_positive)]
+        return [self.activation_function_first(neuron_data_first), self.activation_function_second(neuron_data_second)]
 
 
 class DeepLayer(LayerBuilder):
@@ -283,7 +285,7 @@ class NeuralNetwork(LayerBuilder):
         Строит нейронную сеть, добавляя входной, глубокие и выходной слои.
         """
         logger.info('Начало построения нейронной сети.')
-        input_layer = InputLayer(self.input_dataset, self._get_linear)
+        input_layer = InputLayer(self.input_dataset, self._get_linear, self._get_linear)
         self.add_layer('input_layer', input_layer)
         logger.debug(f'Входной слой создан с параметрами: {input_layer}')
 

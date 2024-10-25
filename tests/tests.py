@@ -25,13 +25,13 @@ class TestLayerBuilder(unittest.TestCase):
         """
         Инициализация общих параметров тестов.
         """
-        self.input_data = [1, 1]
+        self.input_data = [1.0, 1]
         self.neuron_number = 2
         self.bias = 1
         self.switch = False
         self.switch_list = [False, False]
         self.layer_builder = LayerBuilder()
-        self.input_layer = InputLayer(self.input_data, self.layer_builder._get_sigmoid)
+        self.input_layer = InputLayer(self.input_data, self.layer_builder._get_linear, self.layer_builder._get_sigmoid)
         self.neural_network = NeuralNetwork([1, 1])
 
     def test__initialize_weights(self):
@@ -94,7 +94,7 @@ class TestLayerBuilder(unittest.TestCase):
         """
         Проверяет распространение данных через слой.
         """
-        self.assertEqual(self.neural_network.propagate(self.input_layer), [0.5216034037870158, 0.40894412231519817])
+        self.assertEqual(self.neural_network.propagate(self.input_layer), [1.2912199575154468, 0.40894412231519817])
 
     def test_add_layer(self):
         """
