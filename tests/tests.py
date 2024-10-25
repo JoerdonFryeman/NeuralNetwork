@@ -34,12 +34,12 @@ class TestLayerBuilder(unittest.TestCase):
         self.input_layer = InputLayer(self.input_data, self.layer_builder._get_sigmoid)
         self.neural_network = NeuralNetwork([1, 1])
 
-    def test__generate_weights_size(self):
+    def test__initialize_weights(self):
         """
         Проверяет корректность генерации весов для нейронов.
         """
-        expected_weights = [[0.6888437030500962, 0.515908805880605], [-0.15885683833831, -0.4821664994140733]]
-        result = self.layer_builder._generate_weights_size(self.input_data, self.neuron_number)
+        expected_weights = [[0.3444218515250481, 0.2579544029403025], [-0.079428419169155, -0.24108324970703665]]
+        result = self.layer_builder._initialize_weights(self.input_data, self.neuron_number)
         self.assertEqual(result, expected_weights)
 
     def test__verify_switch_type(self):
@@ -54,7 +54,7 @@ class TestLayerBuilder(unittest.TestCase):
         """
         Проверяет корректность вычисления данных нейронов.
         """
-        expected_result = [-0.7952474910692988, -2.641023337752383]
+        expected_result = [-1.3976237455346494, -2.3205116688761915]
         result = self.layer_builder._calculate_neuron_dataset(
             self.input_data, self.neuron_number, self.bias, self.switch
         )
@@ -94,7 +94,7 @@ class TestLayerBuilder(unittest.TestCase):
         """
         Проверяет распространение данных через слой.
         """
-        self.assertEqual(self.neural_network.propagate(self.input_layer), [0.5431262981835264, 0.3237340505557927])
+        self.assertEqual(self.neural_network.propagate(self.input_layer), [0.5216034037870158, 0.40894412231519817])
 
     def test_add_layer(self):
         """

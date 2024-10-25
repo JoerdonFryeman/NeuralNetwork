@@ -17,7 +17,7 @@ class LayerBuilder:
         return f'Модуль: {__name__}; Класс: {self.__class__.__name__}; Адрес в памяти: {hex(id(self))}\n'
 
     @classmethod
-    def _generate_weights_size(cls, input_dataset: list[int | float], neuron_number: int) -> list[list[float]]:
+    def _initialize_weights(cls, input_dataset: list[int | float], neuron_number: int) -> list[list[float]]:
         """
         Генерирует размеры весов для нейронов.
         :param input_dataset: Список входных данных.
@@ -27,7 +27,7 @@ class LayerBuilder:
         if cls._test_mode:
             seed(0)  # Фиксация предсказуемых значений для тестирования
         logger.info(f'Генерация весов для входных данных размером {len(input_dataset)} и {neuron_number} нейронов.')
-        return [[uniform(-1, 1) for _ in range(len(input_dataset))] for _ in range(neuron_number)]
+        return [[uniform(-0.5, 0.5) for _ in range(len(input_dataset))] for _ in range(neuron_number)]
 
     @staticmethod
     def _verify_switch_type(switch: bool | list[bool], neuron_number: int) -> list[bool]:
@@ -61,7 +61,7 @@ class LayerBuilder:
             seed(0)  # Фиксация предсказуемых значений для тестирования
         logger.info(f'Вычисление данных для {neuron_number} нейронов с bias={bias}.')
         neuron_dataset = []
-        weights = cls._generate_weights_size(input_dataset, neuron_number)
+        weights = cls._initialize_weights(input_dataset, neuron_number)
         switch_list = cls._verify_switch_type(switch, neuron_number)
         for n in range(neuron_number):
             neuron_dataset.append(
@@ -117,6 +117,12 @@ class LayerBuilder:
             e_neg_2x = 1 - 2 * x * e_neg_2x / i
         return (e_pos_2x - e_neg_2x) / (e_pos_2x + e_neg_2x)
 
+    @staticmethod
+    def _get_solution(x, bias):
+        if x > 0:
+            return x + bias
+        return x - bias
+
 
 class InputLayer(LayerBuilder):
     """
@@ -134,7 +140,7 @@ class InputLayer(LayerBuilder):
             seed(0)
         self.input_dataset = input_dataset
         self.__neuron_number = 2
-        self.bias = uniform(-1, 1)
+        self.bias = uniform(-0.5, 0.5)
         self.switch_list = [False, True]
         self.activation_function = activation_function
 
@@ -167,7 +173,7 @@ class DeepLayer(LayerBuilder):
             seed(0)
         self.input_dataset = input_dataset
         self.neuron_number = neuron_number
-        self.bias = uniform(-1, 1)
+        self.bias = uniform(-0.5, 0.5)
         self.activation_function = activation_function
 
     def get_layer_dataset(self) -> list[float]:
@@ -195,7 +201,7 @@ class OutputLayer(LayerBuilder):
         if self._test_mode:
             seed(0)  # Фиксация предсказуемых значений для тестирования
         self.input_dataset = input_dataset
-        self.bias = uniform(-1, 1)
+        self.bias = uniform(-0.5, 0.5)
         self.activation_function = activation_function
 
     def get_layer_dataset(self):
@@ -203,13 +209,7 @@ class OutputLayer(LayerBuilder):
         Получает массив данных слоя с примененной активационной функцией.
         :return: Значение после применения активационной функции.
         """
-        input_dataset = self.input_dataset
-        sum_input = sum(input_dataset)
-        if sum_input > 0:
-            result = sum_input + self.bias
-        else:
-            result = sum_input - self.bias
-        logger.debug(self)
+        result = sum(self.input_dataset)
         return self.activation_function(result)
 
 
@@ -283,7 +283,7 @@ class NeuralNetwork(LayerBuilder):
         Строит нейронную сеть, добавляя входной, глубокие и выходной слои.
         """
         logger.info('Начало построения нейронной сети.')
-        input_layer = InputLayer(self.input_dataset, self._get_sigmoid)
+        input_layer = InputLayer(self.input_dataset, self._get_linear)
         self.add_layer('input_layer', input_layer)
         logger.debug(f'Входной слой создан с параметрами: {input_layer}')
 
@@ -295,7 +295,7 @@ class NeuralNetwork(LayerBuilder):
         self.add_layer('deep_layer_second', deep_layer_second)
         logger.debug(f'Второй глубокий слой создан с параметрами: {deep_layer_second}')
 
-        output_layer = OutputLayer(self.propagate(deep_layer_second), self._get_tanh)
+        output_layer = OutputLayer(self.propagate(deep_layer_second), self._get_sigmoid)
         self.add_layer('output_layer', output_layer)
         logger.debug(f'Выходной слой создан с параметрами: {output_layer}')
 

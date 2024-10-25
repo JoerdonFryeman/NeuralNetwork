@@ -21,3 +21,6 @@ coverage.xml
 *.iws
 # Logs
 /data.log
+# Notes
+notes.py
+notes.txt
