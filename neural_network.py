@@ -17,17 +17,17 @@ class LayerBuilder:
         return f'Модуль: {__name__}; Класс: {self.__class__.__name__}; Адрес в памяти: {hex(id(self))}\n'
 
     @classmethod
-    def _initialize_weights(cls, input_dataset: list[int | float], neuron_number: int) -> list[list[float]]:
+    def _initialize_weights(cls, input_size: int, neuron_number: int) -> list[list[float]]:
         """
         Генерирует размеры весов для нейронов.
-        :param input_dataset: Список входных данных.
+        :param input_size: Размер списка входных данных.
         :param neuron_number: Количество нейронов.
         :return: Массив из списков весов.
         """
         if cls._test_mode:
             seed(0)  # Фиксация предсказуемых значений для тестирования
-        logger.info(f'Генерация весов для входных данных размером {len(input_dataset)} и {neuron_number} нейронов.')
-        return [[uniform(-0.5, 0.5) for _ in range(len(input_dataset))] for _ in range(neuron_number)]
+        logger.info(f'Генерация весов для входных данных размером {input_size} и {neuron_number} нейронов.')
+        return [[uniform(-0.1, 0.1) for _ in range(input_size)] for _ in range(neuron_number)]
 
     @staticmethod
     def _verify_switch_type(switch: bool | list[bool], neuron_number: int) -> list[bool]:
@@ -47,12 +47,14 @@ class LayerBuilder:
 
     @classmethod
     def _calculate_neuron_dataset(
-            cls, input_dataset: list[int | float], neuron_number: int, bias: float, switch: bool | list[bool]
+            cls, input_dataset: list[int | float], neuron_number: int,
+            weights: list[list[int | float]], bias: float, switch: bool | list[bool]
     ) -> list[float]:
         """
         Вычисляет значения массива данных нейронов с заданными параметрами.
         :param input_dataset: Список входных данных.
         :param neuron_number: Количество нейронов.
+        :param weights: Список весов нейронов.
         :param bias: Смещение.
         :param switch: Булевое значение или список булевых значений.
         :return: Список результатов обработки данных нейронов.
@@ -61,7 +63,6 @@ class LayerBuilder:
             seed(0)  # Фиксация предсказуемых значений для тестирования
         logger.info(f'Вычисление данных для {neuron_number} нейронов с bias={bias}.')
         neuron_dataset = []
-        weights = cls._initialize_weights(input_dataset, neuron_number)
         switch_list = cls._verify_switch_type(switch, neuron_number)
         for n in range(neuron_number):
             neuron_dataset.append(
@@ -71,6 +72,8 @@ class LayerBuilder:
         logger.info(f'Результаты вычислений: {result}')
         return result
 
+
+class ActivationFunctions:
     @staticmethod
     def _get_linear(x):
         """
@@ -140,8 +143,10 @@ class InputLayer(LayerBuilder):
         if self._test_mode:
             seed(0)
         self.input_dataset = input_dataset
+        self.input_size = len(input_dataset)
         self.__neuron_number = 2
-        self.bias = uniform(-0.5, 0.5)
+        self.weights = self._initialize_weights(self.input_size, self.__neuron_number)
+        self.bias = uniform(-0.1, 0.1)
         self.switch_list = [True, True]
         self.activation_function_first = activation_function_first
         self.activation_function_second = activation_function_second
@@ -152,7 +157,7 @@ class InputLayer(LayerBuilder):
         :return: Список значений после применения активационной функции.
         """
         neuron_data_first, neuron_data_second = self._calculate_neuron_dataset(
-            self.input_dataset, self.__neuron_number, self.bias, self.switch_list
+            self.input_dataset, self.__neuron_number, self.weights, self.bias, self.switch_list
         )
         logger.debug(self)
         return [self.activation_function_first(neuron_data_first), self.activation_function_second(neuron_data_second)]
@@ -174,8 +179,10 @@ class DeepLayer(LayerBuilder):
         if self._test_mode:
             seed(0)
         self.input_dataset = input_dataset
+        self.input_size = len(input_dataset)
         self.neuron_number = neuron_number
-        self.bias = uniform(-0.5, 0.5)
+        self.weights = self._initialize_weights(self.input_size, neuron_number)
+        self.bias = uniform(-0.1, 0.1)
         self.activation_function = activation_function
 
     def get_layer_dataset(self) -> list[float]:
@@ -183,7 +190,7 @@ class DeepLayer(LayerBuilder):
         Получает массив данных слоя с примененной активационной функцией.
         :return: Список значений после применения активационной функции.
         """
-        result = self._calculate_neuron_dataset(self.input_dataset, self.neuron_number, self.bias, True)
+        result = self._calculate_neuron_dataset(self.input_dataset, self.neuron_number, self.weights, self.bias, True)
         logger.debug(self)
         return [self.activation_function(i) for i in result]
 
@@ -203,10 +210,10 @@ class OutputLayer(LayerBuilder):
         if self._test_mode:
             seed(0)  # Фиксация предсказуемых значений для тестирования
         self.input_dataset = input_dataset
-        self.bias = uniform(-0.5, 0.5)
+        self.bias = uniform(-0.1, 0.1)
         self.activation_function = activation_function
 
-    def get_layer_dataset(self):
+    def get_layer_dataset(self) -> int | float:
         """
         Получает массив данных слоя с примененной активационной функцией.
         :return: Значение после применения активационной функции.
@@ -215,7 +222,7 @@ class OutputLayer(LayerBuilder):
         return self.activation_function(result)
 
 
-class NeuralNetwork(LayerBuilder):
+class NeuralNetwork(ActivationFunctions, LayerBuilder):
     """
     Класс для построения и управления нейронной сетью, наследуется от LayerBuilder.
     Управляет различными слоями и их взаимодействием.
