@@ -35,7 +35,7 @@ class TestLayerBuilder(unittest.TestCase):
         self.switch_list = [False, False]
         self.activation_functions = ActivationFunctions()
         self.input_layer = InputLayer(
-            self.input_dataset, self.activation_functions._get_linear, self.activation_functions._get_sigmoid
+            self.input_dataset, self.activation_functions.get_linear, self.activation_functions.get_sigmoid
         )
         self.neural_network = NeuralNetwork([1, 1])
 
@@ -43,7 +43,9 @@ class TestLayerBuilder(unittest.TestCase):
         """
         Проверяет корректность генерации весов для нейронов.
         """
-        expected_weights = [[0.06888437030500963, 0.051590880588060495], [-0.015885683833831002, -0.048216649941407334]]
+        expected_weights = [
+            [0.006888437030500962, 0.0051590880588060495], [-0.0015885683833830998, -0.004821664994140733]
+        ]
         result = self.layer_builder._initialize_weights(self.input_size, self.neuron_number)
         self.assertEqual(result, expected_weights)
 
@@ -59,7 +61,7 @@ class TestLayerBuilder(unittest.TestCase):
         """
         Проверяет корректность вычисления данных нейронов.
         """
-        expected_result = [-1.8795247491069298, -2.0641023337752387]
+        expected_result = [-1.987952474910693, -2.006410233377524]
         result = self.layer_builder._calculate_neuron_dataset(
             self.input_dataset, self.neuron_number, self.weights, self.bias, self.switch
         )
@@ -69,25 +71,25 @@ class TestLayerBuilder(unittest.TestCase):
         """
         Проверяет линейную активационную функцию.
         """
-        self.assertEqual(self.activation_functions._get_linear(1), 1)
+        self.assertEqual(self.activation_functions.get_linear(1), 1)
 
     def test__get_relu(self):
         """
         Проверяет ReLU активационную функцию.
         """
-        self.assertEqual(self.activation_functions._get_relu(1), 1)
+        self.assertEqual(self.activation_functions.get_relu(1), 1)
 
     def test__get_sigmoid(self):
         """
         Проверяет сигмоидную активационную функцию.
         """
-        self.assertEqual(self.activation_functions._get_sigmoid(1), 0.2689414233455059)
+        self.assertEqual(self.activation_functions.get_sigmoid(1), 0.2689414233455059)
 
     def test__get_tanh(self):
         """
         Проверяет активационную функцию тангенс гиперболический (tanh).
         """
-        self.assertEqual(self.activation_functions._get_tanh(1), 0.9640158262858859)
+        self.assertEqual(self.activation_functions.get_tanh(1), 0.9640158262858859)
 
     def test_validate_input_dataset(self):
         """
@@ -99,7 +101,9 @@ class TestLayerBuilder(unittest.TestCase):
         """
         Проверяет распространение данных через слой.
         """
-        self.assertEqual(self.neural_network.propagate(self.input_layer), [0.12498513944051354, 0.5148937039504645])
+        self.assertEqual(
+            self.neural_network.propagate(self.input_layer), [0.012498513944051352, 0.5014898067217889]
+        )
 
     def test_add_layer(self):
         """
