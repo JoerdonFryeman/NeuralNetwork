@@ -1,5 +1,5 @@
 import unittest
-from neural_network import LayerBuilder, ActivationFunctions, InputLayer, NeuralNetwork
+from neural_network import LayerBuilder, ActivationFunctions, OuterLayer, NeuralNetwork
 
 
 class TestLayerBuilder(unittest.TestCase):
@@ -34,8 +34,9 @@ class TestLayerBuilder(unittest.TestCase):
         self.switch = False
         self.switch_list = [False, False]
         self.activation_functions = ActivationFunctions()
-        self.input_layer = InputLayer(
-            self.input_dataset, self.activation_functions.get_linear, self.activation_functions.get_sigmoid
+        self.outer_layer = OuterLayer(
+            self.input_dataset,
+            self.activation_functions.get_linear, self.activation_functions.get_sigmoid, self.switch_list
         )
         self.neural_network = NeuralNetwork([1, 1])
 
@@ -102,21 +103,21 @@ class TestLayerBuilder(unittest.TestCase):
         Проверяет распространение данных через слой.
         """
         self.assertEqual(
-            self.neural_network.propagate(self.input_layer), [0.012498513944051352, 0.5014898067217889]
+            self.neural_network.propagate(self.outer_layer), [0.01159653623456267, 0.5017152988289021]
         )
 
     def test_add_layer(self):
         """
         Проверяет добавление слоя в нейронную сеть.
         """
-        self.neural_network.add_layer('input_layer', self.input_layer)
-        self.assertEqual(self.neural_network.layers['input_layer'], self.input_layer)
+        self.neural_network.add_layer('input_layer', self.outer_layer)
+        self.assertEqual(self.neural_network.layers['input_layer'], self.outer_layer)
 
     def test_remove_layer(self):
         """
         Проверяет удаление слоя из нейронной сети.
         """
-        self.neural_network.add_layer('input_layer', self.input_layer)
+        self.neural_network.add_layer('input_layer', self.outer_layer)
         self.neural_network.remove_layer('input_layer')
         self.assertNotIn('input_layer', self.neural_network.layers)
 
@@ -124,8 +125,8 @@ class TestLayerBuilder(unittest.TestCase):
         """
         Проверяет получение слоя по его имени.
         """
-        self.neural_network.add_layer('input_layer', self.input_layer)
-        self.assertEqual(self.neural_network.get_layer('input_layer'), self.input_layer)
+        self.neural_network.add_layer('input_layer', self.outer_layer)
+        self.assertEqual(self.neural_network.get_layer('input_layer'), self.outer_layer)
 
     def test_build_neural_network(self):
         """
