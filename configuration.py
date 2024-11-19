@@ -14,7 +14,7 @@ def get_json_data(name: str) -> dict:
             data = load(file)
         return data
     except FileNotFoundError:
-        raise FileNotFoundError('File not found!')
+        raise FileNotFoundError('Файл не найден!')
 
 
 config.dictConfig(get_json_data('logging'))

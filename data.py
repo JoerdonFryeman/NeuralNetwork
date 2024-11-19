@@ -27,9 +27,9 @@ class Data:
         with open(file_path, 'r') as f:
             dataset = json.load(f)
     except FileNotFoundError:
-        raise ValueError(f"Файл не найден: {file_path}")
+        raise ValueError(f'Файл не найден: {file_path}')
     except json.JSONDecodeError:
-        raise ValueError(f"Ошибка декодирования JSON в файле: {file_path}")
+        raise ValueError(f'Ошибка декодирования JSON в файле: {file_path}')
 
     @classmethod
     def get_data_dict(cls) -> dict[int, any]:
@@ -55,7 +55,7 @@ class Data:
         """
         result = self.get_data_dict().get(self._get_data_number(self.data_number))
         if result is None:
-            raise ValueError(f"Image number {self._get_data_number(self.data_number)} is out of range.")
+            raise ValueError(f'Номер изображения {self._get_data_number(self.data_number)} за пределами диапазона!')
         return result
 
     def get_normalized_target_value(self, data_number: int) -> float:
