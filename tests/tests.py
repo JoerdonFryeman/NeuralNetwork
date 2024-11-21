@@ -38,6 +38,8 @@ class GeneralTestParameters(unittest.TestCase):
         необходимые для тестов, такие как входной набор данных, количество нейронов и
         различные объекты классов.
         """
+        self.training = True
+        self.initialization = 'uniform'
         self.input_dataset = [1, 2, 3, 4, 5, 6]
         self.neuron_number = 2
 
@@ -61,23 +63,23 @@ class GeneralTestParameters(unittest.TestCase):
         }
         self.activation_functions = ActivationFunctions()
         self.layer_builder = LayerBuilder()
-        self.neural_network = NeuralNetwork(self.input_dataset)
+        self.neural_network = NeuralNetwork(self.training, self.initialization, self.input_dataset)
         self.visualisation = Visualisation()
         self.mode = 'uniform'
 
         self.weights = self.layer_builder._get_weights_mode(
-            len(self.input_dataset), self.neuron_number, [[0.5, -0.5], [0.3, -0.3]], self.mode
+            self.training, len(self.input_dataset), self.neuron_number, [[0.5, -0.5], [0.3, -0.3]], self.mode
         )
         self.bias = 1
         self.switch = False
         self.switch_list = [False, False]
 
         self.outer_layer = OuterLayer(
-            self.input_dataset, self.weights, self.bias,
+            self.training, self.initialization, self.input_dataset, self.weights, self.bias,
             self.activation_functions.get_linear, self.activation_functions.get_sigmoid, self.switch_list
         )
         self.hidden_layer = HiddenLayer(
-            self.input_dataset, self.weights, self.bias,
+            self.training, self.initialization, self.input_dataset, self.weights, self.bias,
             7, self.activation_functions.get_leaky_relu, True
         )
 
@@ -310,25 +312,20 @@ class TestMachineLearningMethods(TestDataMethods):
 
     @patch('builtins.open', new_callable=mock_open)
     @patch('pickle.dump')
-    def test_save_weights_and_biases(self, mock_dump, mock_open):
+    def test_save_weights_and_biases(self, mock_dump, mock_open_instance):
         """
         Тестируем метод _save_weights_and_biases на корректное сохранение весов и смещений в файл.
 
         Этот тест проверяет, что метод _save_weights_and_biases класса MachineLearning
         корректно сохраняет веса и смещения в файл с использованием модуля pickle.
         """
-        weights = {'layer1': [0.1, 0.2, 0.3], 'layer2': [0.4, 0.5, 0.6]}
+        weights = {'layer1': [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]], 'layer2': [[0.7, 0.8], [0.9, 1.0], [1.1, 1.2]]}
         biases = {'layer1': [0.01, 0.02, 0.03], 'layer2': [0.04, 0.05, 0.06]}
         expected_data = {'weights': weights, 'biases': biases}
         MachineLearning._save_weights_and_biases(weights, biases)
-        mock_open.assert_called_once_with('weights_and_biases.pkl', 'wb')
-        file_handle = mock_open()
-        try:
-            mock_dump.assert_called_once_with(expected_data, file_handle)
-        except AssertionError:
-            print('Ожидалось, что функция "dump" будет вызвана один раз, но вызывалась 0 раз.')
-            print('mock_open() вывод: ', file_handle)
-            print('mock_dump() вызовы: ', mock_dump.call_args_list)
+        mock_open_instance.assert_called_once_with('weights_and_biases.pkl', 'wb')
+        file_handle = mock_open_instance()
+        mock_dump.assert_called_once_with(expected_data, file_handle)
 
     def test_calculate_error(self):
         """
@@ -412,7 +409,7 @@ class TestMachineLearningMethods(TestDataMethods):
         gradient = 0.1
         lasso, ridge = True, True
         initial_weights, initial_bias = [row[:] for row in self.weights], self.bias
-        if self.layer_builder.training:
+        if self.training:
             expected_weights = [
                 [
                     0.3443205071031966, 0.2577518870314966, -0.07972518088389749,
@@ -555,12 +552,12 @@ class TestLayerBuilderMethods(TestInitializationFunctions):
         корректно возвращает веса, когда объект находится в состоянии тренировки.
         """
         builder = LayerBuilder()
-        builder.training = True
-        input_size = 3
-        neuron_number = 2
-        weights = []
-        mode = 'uniform'
-        result = builder._get_weights_mode(input_size, neuron_number, weights, mode)
+        self.training = True
+        input_size = len(self.input_dataset)
+        neuron_number = self.neuron_number
+        weights = None
+        mode = self.mode
+        result = builder._get_weights_mode(self.training, input_size, neuron_number, weights, mode)
         self.assertEqual(len(result), neuron_number)
         self.assertEqual(len(result[0]), input_size)
         self.assertEqual(len(result[1]), input_size)
@@ -573,12 +570,12 @@ class TestLayerBuilderMethods(TestInitializationFunctions):
         возвращает существующие веса, когда объект не находится в состоянии тренировки.
         """
         builder = LayerBuilder()
-        builder.training = False
-        input_size = 3
-        neuron_number = 2
+        self.training = False
+        input_size = len(self.input_dataset)
+        neuron_number = self.neuron_number
         weights = [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]
-        mode = 'uniform'
-        result = builder._get_weights_mode(input_size, neuron_number, weights, mode)
+        mode = self.mode
+        result = builder._get_weights_mode(self.training, input_size, neuron_number, weights, mode)
         self.assertEqual(result, weights)
 
     def test_get_bias_mode_training(self):
@@ -589,10 +586,10 @@ class TestLayerBuilderMethods(TestInitializationFunctions):
         корректно возвращает смещение, когда объект находится в состоянии тренировки.
         """
         builder = LayerBuilder()
-        builder.training = True
+        self.training = True
         bias = 0.0
-        mode = 'uniform'
-        result = builder._get_bias_mode(bias, mode)
+        mode = self.mode
+        result = builder._get_bias_mode(self.training, bias, mode)
         self.assertIsInstance(result, float)
 
     def test_get_bias_mode_existing_bias(self):
@@ -603,10 +600,10 @@ class TestLayerBuilderMethods(TestInitializationFunctions):
         возвращает существующее смещение, когда объект не находится в состоянии тренировки.
         """
         builder = LayerBuilder()
-        builder.training = False
+        self.training = False
         bias = 0.5
-        mode = 'uniform'
-        result = builder._get_bias_mode(bias, mode)
+        mode = self.mode
+        result = builder._get_bias_mode(self.training, bias, mode)
         self.assertEqual(result, bias)
 
     def test__verify_switch_type(self):
@@ -627,7 +624,7 @@ class TestLayerBuilderMethods(TestInitializationFunctions):
         Этот тест проверяет, что метод _calculate_neuron_dataset класса LayerBuilder
         корректно вычисляет данные нейронов в зависимости от состояния тренировки объекта.
         """
-        if self.layer_builder.training:
+        if self.training:
             expected_result = [-6.85630916738443, -3.7775713776491626]
         else:
             expected_result = [-2.5, -2.3]
@@ -690,7 +687,7 @@ class TestNeuralNetworkMethods(ActivationFunctions, GeneralTestParameters):
         Этот тест проверяет, что метод propagate класса NeuralNetwork корректно
         распространяет данные через слой, учитывая состояние тренировки.
         """
-        if self.layer_builder.training:
+        if self.training:
             expected_result = [-2.922840276534719, 0.46110436654362297]
         else:
             expected_result = [-2.5, 0.9087119475530022]
@@ -775,7 +772,7 @@ class TestNeuralNetworkMethods(ActivationFunctions, GeneralTestParameters):
             layer = self.neural_network._create_layer(
                 layer_class, layer_name, input_dataset, 2, self.activation_functions.get_relu, True
             )
-            if self.layer_builder.training:
+            if self.training:
                 expected_weights = [
                     [
                         0.3444218515250481, 0.2579544029403025, -0.079428419169155,

@@ -9,8 +9,6 @@ class LayerBuilder(InitializationFunctions):
     Содержит методики для генерации весов, вычисления данных нейронов и различных активационных функций.
     """
     _test_mode: bool = False
-    training: bool = False
-    initialization: str = 'uniform'
 
     def __repr__(self) -> str:
         """
@@ -44,7 +42,7 @@ class LayerBuilder(InitializationFunctions):
             raise ValueError(f'Неизвестный режим инициализации: {mode}')
 
     def _get_weights_mode(
-            self, input_size: int, neuron_number: int, weights: list[list[float]] | None, mode: str
+            self, training, input_size: int, neuron_number: int, weights: list[list[float]] | None, mode: str
     ) -> list[list[float]]:
         """
         Инициализирует веса для слоёв нейронной сети.
@@ -55,7 +53,7 @@ class LayerBuilder(InitializationFunctions):
         :param mode: Режим инициализации ('uniform', 'xavier', 'he').
         :return: Инициализированные веса.
         """
-        if self.training or not weights:
+        if training or not weights:
             if self._test_mode:
                 seed(0)
             logger.info(f'Инициализация весов для входных данных размером {input_size} и {neuron_number} нейронов.')
@@ -63,7 +61,7 @@ class LayerBuilder(InitializationFunctions):
             return [[uniform(*limits) for _ in range(input_size)] for _ in range(neuron_number)]
         return weights
 
-    def _get_bias_mode(self, bias: float, mode: str) -> float | tuple[float, float]:
+    def _get_bias_mode(self, training, bias: float, mode: str) -> float | tuple[float, float]:
         """
         Инициализирует смещения для слоёв нейронной сети.
 
@@ -71,7 +69,7 @@ class LayerBuilder(InitializationFunctions):
         :param mode: Режим инициализации ('uniform', 'xavier', 'he').
         :return: Инициализированные смещения.
         """
-        if self.training or not bias:
+        if training or not bias:
             if self._test_mode:
                 seed(0)
             logger.info(f'Инициализация смещений.')
@@ -132,7 +130,8 @@ class OuterLayer(LayerBuilder):
     """
 
     def __init__(
-            self, input_dataset: list[int | float], weights: list[list[float]], bias: float | tuple[float, float],
+            self, training, initialization, input_dataset: list[int | float],
+            weights: list[list[float]], bias: float | tuple[float, float],
             activation_function_first: callable, activation_function_second: callable, switch_list: list[bool]
     ):
         """
@@ -146,9 +145,9 @@ class OuterLayer(LayerBuilder):
         self.input_dataset: list[int | float] = input_dataset
         self.__neuron_number: int = 2
         self.weights: list[list[float]] = self._get_weights_mode(
-            len(input_dataset), self.__neuron_number, weights, self.initialization
+            training, len(input_dataset), self.__neuron_number, weights, initialization
         )
-        self.bias: float | tuple[float, float] = self._get_bias_mode(bias, self.initialization)
+        self.bias: float | tuple[float, float] = self._get_bias_mode(training, bias, initialization)
         self.activation_function_first: callable = activation_function_first
         self.activation_function_second: callable = activation_function_second
         self.switch_list: list[bool] = switch_list
@@ -172,7 +171,8 @@ class HiddenLayer(LayerBuilder):
     """
 
     def __init__(
-            self, input_dataset: list[int | float], weights: list[list[float]], bias: float | tuple[float, float],
+            self, training, initialization, input_dataset: list[int | float],
+            weights: list[list[float]], bias: float | tuple[float, float],
             neuron_number: int, activation_function: callable, switch: bool
     ):
         """
@@ -186,9 +186,9 @@ class HiddenLayer(LayerBuilder):
         self.input_dataset: list[int | float] = input_dataset
         self.neuron_number: int = neuron_number
         self.weights: list[list[float]] = self._get_weights_mode(
-            len(input_dataset), neuron_number, weights, self.initialization
+            training, len(input_dataset), neuron_number, weights, initialization
         )
-        self.bias: float | tuple[float, float] = self._get_bias_mode(bias, self.initialization)
+        self.bias: float | tuple[float, float] = self._get_bias_mode(training, bias, initialization)
         self.activation_function: callable = activation_function
         self.switch: bool = switch
 

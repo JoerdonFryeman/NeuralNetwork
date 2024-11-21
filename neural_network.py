@@ -23,12 +23,14 @@ class NeuralNetwork(Visualisation, MachineLearning, ActivationFunctions, LayerBu
         :param input_dataset: Список входных данных.
         """
 
-    def __init__(self, input_dataset: list[float]):
+    def __init__(self, training, initialization, input_dataset: list[float]):
         """
         Инициализирует нейронную сеть.
         :param input_dataset: Список входных данных.
         """
         super().__init__()
+        self.training = training
+        self.initialization = initialization
         self.input_dataset = self.validate_input_dataset(input_dataset)
         self.layers: dict[str, object] = {}
 
@@ -142,7 +144,7 @@ class NeuralNetwork(Visualisation, MachineLearning, ActivationFunctions, LayerBu
         weights = data['weights'].get(layer_name)
         bias = data['biases'].get(layer_name)
 
-        layer = layer_class(input_dataset, weights, bias, *args)
+        layer = layer_class(self.training, self.initialization, input_dataset, weights, bias, *args)
         self.add_layer(layer_name, layer)
         logger.debug(f'Слой "{layer_name}" создан с параметрами: {layer}')
         return layer
