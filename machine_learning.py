@@ -4,24 +4,6 @@ from data import Data
 
 
 class MachineLearning(Data):
-    def __init__(self):
-        """
-        Инициализирует объект MachineLearning с начальными параметрами.
-        Атрибуты:
-        - epochs (int): Количество эпох для обучения.
-        - learning_rate (float): Скорость обучения.
-        - error_tolerance (float): Допустимый уровень ошибки.
-        - regularization (float): Параметр регуляризации.
-        - lasso_regularization (bool): Использовать Lasso регуляризацию.
-        - ridge_regularization (bool): Использовать Ridge регуляризацию.
-        """
-        self.epochs: int = 1000
-        self.learning_rate: float = 0.001
-        self.error_tolerance: float = 0.001
-        self.regularization: float = 0.001
-        self.lasso_regularization: bool = False
-        self.ridge_regularization: bool = True
-
     @staticmethod
     def _save_weights_and_biases(weights: dict[str, list[list[float]]], biases: dict[str, list[float]]) -> None:
         """
@@ -77,45 +59,50 @@ class MachineLearning(Data):
 
     @staticmethod
     def _calculate_gradient_descent(
-            weights: list[list[float]], i: int, j: int,
-            learning_rate: float, gradient: float, input_dataset: list[float]
+            input_dataset: list[float], learning_rate: float,
+            gradient: float, weights: list[list[float]], i: int, j: int
     ) -> None:
         """
         Обновляет вес с использованием градиентного спуска.
 
+        :param input_dataset: Входной набор данных.
+        :param learning_rate: Скорость обучения.
+        :param gradient: Градиент.
         :param weights: Список весов.
         :param i: Индекс первой координаты веса.
         :param j: Индекс второй координаты веса.
-        :param learning_rate: Скорость обучения.
-        :param gradient: Градиент.
-        :param input_dataset: Входной набор данных.
         """
         weights[i][j] -= learning_rate * gradient * input_dataset[j]
 
-    def update_weights(self, layer, gradient: float, lasso: bool, ridge: bool) -> None:
+    def update_weights(
+            self, layer, gradient: float, lasso_regularization: bool,
+            ridge_regularization: bool, learning_rate: float, regularization: float
+    ) -> None:
         """
         Обновляет веса слоя с использованием заданных параметров Elastic Net регуляризации.
 
         :param layer: Объект слоя.
         :param gradient: Градиент.
-        :param lasso: Использовать Lasso регуляризацию.
-        :param ridge: Использовать Ridge регуляризацию.
+        :param lasso_regularization: Использовать Lasso регуляризацию.
+        :param ridge_regularization: Использовать Ridge регуляризацию.
+        :param learning_rate: Скорость обучения.
+        :param regularization: Параметр регуляризации.
         """
         for i in range(len(layer.weights)):
             for j in range(len(layer.weights[i])):
                 regularization_term: float = 0.0
-                if lasso:
-                    regularization_term += self._get_lasso_regularization(self.regularization, layer.weights, i, j)
-                if ridge:
-                    regularization_term += self._get_ridge_regularization(self.regularization, layer.weights, i, j)
+                if lasso_regularization:
+                    regularization_term += self._get_lasso_regularization(regularization, layer.weights, i, j)
+                if ridge_regularization:
+                    regularization_term += self._get_ridge_regularization(regularization, layer.weights, i, j)
                 self._calculate_gradient_descent(
-                    layer.weights, i, j, self.learning_rate, gradient + regularization_term, layer.input_dataset
+                    layer.input_dataset, learning_rate, gradient + regularization_term, layer.weights, i, j
                 )
-                if not lasso and not ridge:
+                if not lasso_regularization and not ridge_regularization:
                     self._calculate_gradient_descent(
-                        layer.weights, i, j, self.learning_rate, gradient, layer.input_dataset
+                        layer.input_dataset, learning_rate, gradient, layer.weights, i, j
                     )
-        layer.bias -= self.learning_rate * gradient
+        layer.bias -= learning_rate * gradient
 
     def __get_train_visualisation(self, epoch, prediction, target, layer):
         """
@@ -132,22 +119,33 @@ class MachineLearning(Data):
                 f'prediction: {prediction * 10:.4f}, result: {sum(layer.get_layer_dataset()):.4f}'
             )
 
-    def train(self, layer, data_number: int) -> tuple[list[list[float]], float]:
+    def train(
+            self, data_number: int, layer, epochs: int, learning_rate: float, error_tolerance: float,
+            regularization: float, lasso_regularization: bool, ridge_regularization: bool
+    ) -> tuple[list[list[float]], float]:
         """
         Обучает слой на основании данных.
 
         :param layer: Объект слоя.
         :param data_number: Номер данных.
+        :param epochs: Количество эпох для обучения.
+        :param learning_rate: Скорость обучения.
+        :param error_tolerance: Допустимый уровень ошибки.
+        :param regularization: Параметр регуляризации.
+        :param lasso_regularization: Использовать Lasso регуляризацию.
+        :param ridge_regularization: Использовать Ridge регуляризацию.
         :return: Кортеж с обновленными весами и смещением (bias) слоя.
         """
-        for epoch in range(self.epochs):
+        for epoch in range(epochs):
             layer.input_dataset = self.get_data_sample()
             prediction: float = sum(layer.get_layer_dataset())
             target: float = self.get_normalized_target_value(data_number)
             gradient: float = prediction - target
-            self.update_weights(layer, gradient, self.lasso_regularization, self.ridge_regularization)
+            self.update_weights(
+                layer, gradient, lasso_regularization, ridge_regularization, learning_rate, regularization
+            )
             self.__get_train_visualisation(epoch, prediction, target, layer)
-            if abs(prediction - target) < self.error_tolerance:
+            if abs(prediction - target) < error_tolerance:
                 return layer.weights, layer.bias
 
     @staticmethod
@@ -164,7 +162,9 @@ class MachineLearning(Data):
         )
 
     def train_layers_on_dataset(
-            self, data_number: int, hidden_layer_first, hidden_layer_second, output_outer_layer
+            self, data_number: int, hidden_layer_first, hidden_layer_second,
+            output_outer_layer, epochs: int, learning_rate: float, error_tolerance: float,
+            regularization: float, lasso_regularization: bool, ridge_regularization: bool
     ) -> None:
         """
         Обучает несколько слоев на наборе данных.
@@ -173,19 +173,34 @@ class MachineLearning(Data):
         :param hidden_layer_first: Первый скрытый слой.
         :param hidden_layer_second: Второй скрытый слой.
         :param output_outer_layer: Выходной слой.
+        :param epochs: Количество эпох для обучения.
+        :param learning_rate: Скорость обучения.
+        :param error_tolerance: Допустимый уровень ошибки.
+        :param regularization: Параметр регуляризации.
+        :param lasso_regularization: Использовать Lasso регуляризацию.
+        :param ridge_regularization: Использовать Ridge регуляризацию.
         """
         weights: dict[str, list[list[float]]] = {}
         biases: dict[str, list[float]] = {}
 
         for i in range(len(self.dataset[self.data_name])):
             hidden_layer_first.input_dataset = self.get_data_sample()
-            self.train(hidden_layer_first, data_number)
+            self.train(
+                data_number, hidden_layer_first, epochs, learning_rate,
+                error_tolerance, regularization, lasso_regularization, ridge_regularization
+            )
 
             hidden_layer_second.input_dataset = hidden_layer_first.get_layer_dataset()
-            self.train(hidden_layer_second, data_number)
+            self.train(
+                data_number, hidden_layer_second, epochs, learning_rate,
+                error_tolerance, regularization, lasso_regularization, ridge_regularization
+            )
 
             output_outer_layer.input_dataset = hidden_layer_second.get_layer_dataset()
-            self.train(output_outer_layer, data_number)
+            self.train(
+                data_number, output_outer_layer, epochs, learning_rate,
+                error_tolerance, regularization, lasso_regularization, ridge_regularization
+            )
 
             self.__get_train_layers_on_dataset_visualisation(data_number, output_outer_layer)
             data_number += 1

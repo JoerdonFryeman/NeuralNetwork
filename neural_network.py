@@ -149,7 +149,10 @@ class NeuralNetwork(Visualisation, MachineLearning, ActivationFunctions, LayerBu
         logger.debug(f'Слой "{layer_name}" создан с параметрами: {layer}')
         return layer
 
-    def build_neural_network(self) -> None:
+    def build_neural_network(
+            self, epochs: int, learning_rate: float, error_tolerance: float,
+            regularization: float, lasso_regularization: bool, ridge_regularization: bool
+    ) -> None:
         """
         Строит нейронную сеть, добавляя внешние и скрытые слои.
 
@@ -158,6 +161,12 @@ class NeuralNetwork(Visualisation, MachineLearning, ActivationFunctions, LayerBu
         и, если стоит флаг `self.training`, проводится обучение сети.
         В конце вызывается метод визуализации сети.
 
+        :param epochs: Количество эпох для обучения.
+        :param learning_rate: Скорость обучения.
+        :param error_tolerance: Допустимый уровень ошибки.
+        :param regularization: Параметр регуляризации.
+        :param lasso_regularization: Использовать Lasso регуляризацию.
+        :param ridge_regularization: Использовать Ridge регуляризацию.
         :return: None
         """
         hidden_layer_first = self._create_layer(
@@ -172,12 +181,11 @@ class NeuralNetwork(Visualisation, MachineLearning, ActivationFunctions, LayerBu
             OuterLayer, 'output_outer_layer', self.propagate(hidden_layer_second),
             self.get_elu, self.get_elu, [True, True]
         )
-        logger.info('Построение нейронной сети завершено.')
-
         if self.training:
             self.train_layers_on_dataset(
                 self.data_number,
-                hidden_layer_first, hidden_layer_second, output_outer_layer
+                hidden_layer_first, hidden_layer_second, output_outer_layer, epochs, learning_rate,
+                error_tolerance, regularization, lasso_regularization, ridge_regularization
             )
             logger.info('Обучение нейронной сети завершено.')
 

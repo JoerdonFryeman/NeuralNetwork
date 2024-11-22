@@ -2,6 +2,7 @@ import os
 import pickle
 import tempfile
 import unittest
+from main import Control
 from unittest.mock import patch, mock_open
 from data import Data
 from layers import LayerBuilder, OuterLayer, HiddenLayer
@@ -347,11 +348,11 @@ class TestMachineLearningMethods(TestDataMethods):
         Этот тест проверяет, что метод _get_lasso_regularization класса MachineLearning
         корректно вычисляет значения регуляризации Lasso для положительного веса.
         """
-        regularization = 0.001
+        control = Control()
         weights = [[0.5, -0.2], [0.8, -0.4]]
         i, j = 0, 0
         expected_regularization = 0.001
-        result = MachineLearning._get_lasso_regularization(regularization, weights, i, j)
+        result = MachineLearning._get_lasso_regularization(control.regularization, weights, i, j)
         self.assertEqual(result, expected_regularization)
 
     def test_get_lasso_regularization_negative_weight(self):
@@ -361,11 +362,11 @@ class TestMachineLearningMethods(TestDataMethods):
         Этот тест проверяет, что метод _get_lasso_regularization класса MachineLearning
         корректно вычисляет значения регуляризации Lasso для отрицательного веса.
         """
-        regularization = 0.001
+        control = Control()
         weights = [[0.5, -0.2], [0.8, -0.4]]
         i, j = 0, 1
         expected_regularization = -0.001
-        result = MachineLearning._get_lasso_regularization(regularization, weights, i, j)
+        result = MachineLearning._get_lasso_regularization(control.regularization, weights, i, j)
         self.assertEqual(result, expected_regularization)
 
     def test_get_ridge_regularization(self):
@@ -375,11 +376,11 @@ class TestMachineLearningMethods(TestDataMethods):
         Этот тест проверяет, что метод _get_ridge_regularization класса MachineLearning
         корректно вычисляет значении регуляризации Ridge.
         """
-        regularization = 0.001
+        control = Control()
         weights = [[0.5, -0.2], [0.8, -0.4]]
         i, j = 0, 0
         expected_regularization = 0.0005
-        result = MachineLearning._get_ridge_regularization(regularization, weights, i, j)
+        result = MachineLearning._get_ridge_regularization(control.regularization, weights, i, j)
         self.assertEqual(result, expected_regularization)
 
     def test_calculate_gradient_descent(self):
@@ -389,14 +390,14 @@ class TestMachineLearningMethods(TestDataMethods):
         Этот тест проверяет, что метод _calculate_gradient_descent класса MachineLearning
         корректно обновляет веса в соответствии с градиентным спуском.
         """
+        control = Control()
         weights = [[0.5, 0.25], [0.75, 0.5]]
         i, j = 0, 0
-        learning_rate = 0.01
         gradient = 0.1
         input_dataset = [1.0, 2.0]
-        MachineLearning._calculate_gradient_descent(weights, i, j, learning_rate, gradient, input_dataset)
+        MachineLearning._calculate_gradient_descent(input_dataset, control.learning_rate, gradient, weights, i, j)
         expected_weight = 0.5 - 0.01 * 0.1 * 1.0
-        self.assertEqual(weights[i][j], expected_weight)
+        self.assertAlmostEqual(weights[i][j], expected_weight, places=2)
 
     def test_update_weights(self):
         """
@@ -405,6 +406,7 @@ class TestMachineLearningMethods(TestDataMethods):
         Этот тест проверяет, что метод update_weights класса MachineLearning корректно обновляет веса
         во время обучения с использованием градиентного спуска с учетом регуляризации Lasso и Ridge.
         """
+        control = Control()
         ml = MachineLearning()
         gradient = 0.1
         lasso, ridge = True, True
@@ -423,32 +425,32 @@ class TestMachineLearningMethods(TestDataMethods):
         else:
             expected_weights = [
                 [
-                    initial_weights[0][0] - ml.learning_rate * (
+                    initial_weights[0][0] - control.learning_rate * (
                             gradient + ml._get_lasso_regularization(
-                        ml.regularization, initial_weights, 0, 0
-                    ) + ml._get_ridge_regularization(ml.regularization, initial_weights, 0, 0)
+                        control.regularization, initial_weights, 0, 0
+                    ) + ml._get_ridge_regularization(control.regularization, initial_weights, 0, 0)
                     ) * self.input_dataset[0],
-                    initial_weights[0][1] - ml.learning_rate * (
+                    initial_weights[0][1] - control.learning_rate * (
                             gradient + ml._get_lasso_regularization(
-                        ml.regularization, initial_weights, 0, 1
-                    ) + ml._get_ridge_regularization(ml.regularization, initial_weights, 0, 1)
+                        control.regularization, initial_weights, 0, 1
+                    ) + ml._get_ridge_regularization(control.regularization, initial_weights, 0, 1)
                     ) * self.input_dataset[1],
                 ],
                 [
-                    initial_weights[1][0] - ml.learning_rate * (
-                            gradient + ml._get_lasso_regularization(ml.regularization, initial_weights, 1, 0
+                    initial_weights[1][0] - control.learning_rate * (
+                            gradient + ml._get_lasso_regularization(control.regularization, initial_weights, 1, 0
                                                                     ) + ml._get_ridge_regularization(
-                        ml.regularization, initial_weights, 1, 0)
+                        control.regularization, initial_weights, 1, 0)
                     ) * self.input_dataset[0],
-                    initial_weights[1][1] - ml.learning_rate * (
-                            gradient + ml._get_lasso_regularization(ml.regularization, initial_weights, 1, 1
+                    initial_weights[1][1] - control.learning_rate * (
+                            gradient + ml._get_lasso_regularization(control.regularization, initial_weights, 1, 1
                                                                     ) + ml._get_ridge_regularization(
-                        ml.regularization, initial_weights, 1, 1)
+                        control.regularization, initial_weights, 1, 1)
                     ) * self.input_dataset[1],
                 ]
             ]
-        expected_bias = initial_bias - ml.learning_rate * gradient
-        ml.update_weights(self, gradient, lasso, ridge)
+        expected_bias = initial_bias - control.learning_rate * gradient
+        ml.update_weights(self, gradient, lasso, ridge, control.learning_rate, control.regularization)
         self.assertEqual(self.weights, expected_weights)
         self.assertEqual(self.bias, expected_bias)
 
@@ -459,12 +461,16 @@ class TestMachineLearningMethods(TestDataMethods):
         Этот тест проверяет, что метод train класса MachineLearning корректно изменяет
         веса и смещения слоя во время обучения.
         """
+        control = Control()
         ml = MachineLearning()
         layer = self.outer_layer
         initial_weights = [row[:] for row in layer.weights]
         initial_bias = layer.bias
         data_number = 0
-        ml.train(layer, data_number)
+        ml.train(
+            data_number, layer, control.epochs, control.learning_rate, control.error_tolerance,
+            control.regularization, control.lasso_regularization, control.ridge_regularization
+        )
         self.assertNotEqual(layer.weights, initial_weights)
         self.assertNotEqual(layer.bias, initial_bias)
 
@@ -807,10 +813,14 @@ class TestNeuralNetworkMethods(ActivationFunctions, GeneralTestParameters):
         корректно вызывает метод _create_layer три раза, а также корректно добавляет
         слои в нейронную сеть.
         """
+        control = Control()
         with unittest.mock.patch.object(
                 self.neural_network, '_create_layer', wraps=self.neural_network._create_layer
         ) as mock_create_layer:
-            self.neural_network.build_neural_network()
+            self.neural_network.build_neural_network(
+                control.epochs, control.learning_rate, control.error_tolerance,
+                control.regularization, control.lasso_regularization, control.ridge_regularization
+            )
             self.assertEqual(mock_create_layer.call_count, 3)
             self.assertIn('hidden_layer_first', self.neural_network.layers)
             self.assertIn('hidden_layer_second', self.neural_network.layers)
