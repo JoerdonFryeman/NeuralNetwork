@@ -137,14 +137,14 @@ class MachineLearning(Data):
             )
 
     def train(
-            self, data_number: int, layer, epochs: int, learning_rate: float, learning_decay: float,
+            self, data_key: str, layer, epochs: int, learning_rate: float, learning_decay: float,
             error_tolerance: float, regularization: float, lasso_regularization: bool, ridge_regularization: bool
     ) -> tuple[list[list[float]], float]:
         """
         Обучает слой на основании данных.
 
         :param layer: Объект слоя.
-        :param data_number: Номер данных.
+        :param data_key: Ключ данных.
         :param epochs: Количество эпох для обучения.
         :param learning_rate: Скорость обучения.
         :param learning_decay: Уменьшение скорости обучения.
@@ -157,7 +157,7 @@ class MachineLearning(Data):
         for epoch in range(epochs):
             layer.input_dataset = self.get_data_sample()
             prediction: float = sum(layer.get_layer_dataset())
-            target: float = self.get_normalized_target_value(data_number)
+            target: float = self.get_target_value_by_key(data_key)
             gradient: float = prediction - target
             self.update_weights(
                 layer, gradient, lasso_regularization, ridge_regularization, learning_rate, regularization
@@ -181,14 +181,13 @@ class MachineLearning(Data):
         )
 
     def train_layers_on_dataset(
-            self, data_number: int, hidden_layer_first, hidden_layer_second,
+            self, hidden_layer_first, hidden_layer_second,
             output_outer_layer, epochs: int, learning_rate: float, learning_decay: float, error_tolerance: float,
             regularization: float, lasso_regularization: bool, ridge_regularization: bool
     ) -> None:
         """
         Обучает несколько слоев на наборе данных.
 
-        :param data_number: Номер данных.
         :param hidden_layer_first: Первый скрытый слой.
         :param hidden_layer_second: Второй скрытый слой.
         :param output_outer_layer: Выходной слой.
@@ -203,27 +202,24 @@ class MachineLearning(Data):
         weights: dict[str, list[list[float]]] = {}
         biases: dict[str, list[float]] = {}
 
-        for i in range(len(self.dataset[self.data_name])):
-            hidden_layer_first.input_dataset = self.get_data_sample()
-            self.train(
-                data_number, hidden_layer_first, epochs, learning_rate, learning_decay,
-                error_tolerance, regularization, lasso_regularization, ridge_regularization
-            )
-
-            hidden_layer_second.input_dataset = hidden_layer_first.get_layer_dataset()
-            self.train(
-                data_number, hidden_layer_second, epochs, learning_rate, learning_decay,
-                error_tolerance, regularization, lasso_regularization, ridge_regularization
-            )
-
-            output_outer_layer.input_dataset = hidden_layer_second.get_layer_dataset()
-            self.train(
-                data_number, output_outer_layer, epochs, learning_rate, learning_decay,
-                error_tolerance, regularization, lasso_regularization, ridge_regularization
-            )
-
-            self.__get_train_layers_on_dataset_visualisation(data_number, output_outer_layer)
-            data_number += 1
+        for data_key, data_samples in self.dataset[self.data_name].items():
+            for _ in data_samples:
+                hidden_layer_first.input_dataset = self.get_data_sample()
+                self.train(
+                    data_key, hidden_layer_first, epochs, learning_rate, learning_decay,
+                    error_tolerance, regularization, lasso_regularization, ridge_regularization
+                )
+                hidden_layer_second.input_dataset = hidden_layer_first.get_layer_dataset()
+                self.train(
+                    data_key, hidden_layer_second, epochs, learning_rate, learning_decay,
+                    error_tolerance, regularization, lasso_regularization, ridge_regularization
+                )
+                output_outer_layer.input_dataset = hidden_layer_second.get_layer_dataset()
+                self.train(
+                    data_key, output_outer_layer, epochs, learning_rate, learning_decay,
+                    error_tolerance, regularization, lasso_regularization, ridge_regularization
+                )
+                self.__get_train_layers_on_dataset_visualisation(data_key, output_outer_layer)
 
         weights['hidden_layer_first'] = hidden_layer_first.weights
         weights['hidden_layer_second'] = hidden_layer_second.weights

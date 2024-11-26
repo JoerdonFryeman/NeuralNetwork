@@ -184,7 +184,6 @@ class NeuralNetwork(Visualisation, MachineLearning, ActivationFunctions, LayerBu
         )
         if self.training:
             self.train_layers_on_dataset(
-                self.data_number,
                 hidden_layer_first, hidden_layer_second, output_outer_layer, epochs, learning_rate,
                 learning_decay, error_tolerance, regularization, lasso_regularization, ridge_regularization
             )

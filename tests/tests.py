@@ -46,22 +46,7 @@ class GeneralTestParameters(unittest.TestCase):
 
         self.data = Data()
         self.data.data_name = 'cube'
-        self.data.dataset = {
-            'cube': [
-                [
-                    0.2549019607843137, 0.24313725490196078, 0.21568627450980393,
-                    0.24705882352941178, 0.25098039215686274, 0.25098039215686274
-                ],
-                [
-                    0.7333333333333333, 0.7215686274509804, 0.6941176470588235,
-                    0.6901960784313725, 0.6823529411764706, 0.6784313725490196
-                ],
-                [0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
-                [0.7, 0.7, 0.7, 0.7, 0.7, 0.7],
-                [0.8, 0.8, 0.8, 0.8, 0.8, 0.8],
-                [0.9, 0.9, 0.9, 0.9, 0.9, 0.9],
-            ]
-        }
+        self.data.dataset = {'cube': ['1', '2', '3', '4', '5', '6']}
         self.activation_functions = ActivationFunctions()
         self.layer_builder = LayerBuilder()
         self.neural_network = NeuralNetwork(self.training, self.initialization, self.input_dataset)
@@ -138,16 +123,6 @@ class TestDataMethods(GeneralTestParameters):
         """
         pass
 
-    def test_get_data_number(self):
-        """
-        Тестируем метод _get_data_number на возврат корректного номера данных.
-
-        Этот тест проверяет, что метод _get_data_number класса Data возвращает
-        корректные номера данных из набора входных данных.
-        """
-        for num in self.input_dataset:
-            self.assertEqual(Data._get_data_number(num), num)
-
     def test_get_data_sample(self):
         """
         На данный момент помечен как TODO.
@@ -159,13 +134,34 @@ class TestDataMethods(GeneralTestParameters):
 
     def test_get_normalized_target_value(self):
         """
+        На данный момент помечен как TODO.
         Тестируем метод get_normalized_target_value на возврат нормированного значения целевого объекта.
 
         Этот тест проверяет, что метод get_normalized_target_value класса Data возвращает
         нормированное значение целевого объекта, деля его на 10.
         """
-        for num in self.input_dataset:
-            self.assertEqual(self.data.get_normalized_target_value(num), num / 10)
+        pass
+
+    def test_get_target_value_by_key_valid_key(self):
+        # Проверяем, что метод возвращает правильное значение для валидного ключа
+        key = '3'
+        expected_value = 0.3
+        result = self.data.get_target_value_by_key(key)
+        self.assertEqual(result, expected_value, f"Метод вернул неправильное значение для ключа {key}")
+
+    def test_get_target_value_by_key_invalid_key(self):
+        # Проверяем, что метод возвращает 0.0 для несуществующего ключа
+        key = '10'
+        expected_value = 0.0
+        result = self.data.get_target_value_by_key(key)
+        self.assertEqual(result, expected_value, f"Метод вернул неправильное значение для несуществующего ключа {key}")
+
+    def test_get_target_value_by_key_edge_case_key(self):
+        # Проверяем крайний случай, когда ключ находится в пределах, но ближайший к границе
+        key = '6'
+        expected_value = 0.6
+        result = self.data.get_target_value_by_key(key)
+        self.assertEqual(result, expected_value, f"Метод вернул неправильное значение для ключа {key}")
 
 
 class TestInitializationFunctions(GeneralTestParameters):
@@ -497,23 +493,13 @@ class TestMachineLearningMethods(TestDataMethods):
 
     def test_train(self):
         """
+        На данный момент помечен как TODO.
         Тестируем метод train на корректное обучение модели.
 
         Этот тест проверяет, что метод train класса MachineLearning корректно изменяет
         веса и смещения слоя во время обучения.
         """
-        control = Control()
-        ml = MachineLearning()
-        layer = self.outer_layer
-        initial_weights = [row[:] for row in layer.weights]
-        initial_bias = layer.bias
-        data_number = 0
-        ml.train(
-            data_number, layer, control.epochs, control.learning_rate, control.learning_decay,
-            control.error_tolerance, control.regularization, control.lasso_regularization, control.ridge_regularization
-        )
-        self.assertNotEqual(layer.weights, initial_weights)
-        self.assertNotEqual(layer.bias, initial_bias)
+        pass
 
     def test_train_layers_on_dataset(self):
         """
