@@ -12,7 +12,7 @@ class Control:
     training : bool
         Указывает, находится ли сеть в режиме тренировки. По умолчанию False.
     initialization : str
-        Метод инициализации весов сети. Например, 'uniform'. По умолчанию 'uniform'.
+        Метод инициализации весов сети. Например, 'xavier'. По умолчанию 'xavier'.
     epochs : int
         Количество эпох для обучения. По умолчанию 1000.
     learning_rate : float
@@ -30,21 +30,19 @@ class Control:
     def __init__(self):
         """Инициализирует объект Control с параметрами по умолчанию."""
         self.training: bool = False
-        self.initialization: str = 'uniform'
+        self.initialization: str = 'xavier'
         self.epochs: int = 1000
         self.learning_rate: float = 0.001
+        self.learning_decay = 0.00995
         self.error_tolerance: float = 0.001
         self.regularization: float = 0.001
-        self.lasso_regularization: bool = False
+        self.lasso_regularization: bool = True
         self.ridge_regularization: bool = True
 
 
 def initialize_objects(control: Control):
     data = Data()
-    network = NeuralNetwork(
-        control.training, control.initialization,
-        data.get_data_sample()
-    )
+    network = NeuralNetwork(control.training, control.initialization, data.get_data_sample())
     return data, network
 
 
@@ -52,11 +50,10 @@ def main():
     """Основная функция, которая запускает процесс создания и визуализации нейронной сети."""
     control = Control()
     data, network = initialize_objects(control)
-
     try:
         logger.info("Начало построения нейронной сети.")
         network.build_neural_network(
-            control.epochs, control.learning_rate, control.error_tolerance,
+            control.epochs, control.learning_rate, control.learning_decay, control.error_tolerance,
             control.regularization, control.lasso_regularization, control.ridge_regularization
         )
         logger.info("Построение нейронной сети завершено.")

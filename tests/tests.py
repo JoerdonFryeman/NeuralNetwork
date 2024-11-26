@@ -40,7 +40,7 @@ class GeneralTestParameters(unittest.TestCase):
         различные объекты классов.
         """
         self.training = True
-        self.initialization = 'uniform'
+        self.initialization = 'xavier'
         self.input_dataset = [1, 2, 3, 4, 5, 6]
         self.neuron_number = 2
 
@@ -66,10 +66,11 @@ class GeneralTestParameters(unittest.TestCase):
         self.layer_builder = LayerBuilder()
         self.neural_network = NeuralNetwork(self.training, self.initialization, self.input_dataset)
         self.visualisation = Visualisation()
-        self.mode = 'uniform'
+        self.learning_decay = 0.00995
 
         self.weights = self.layer_builder._get_weights_mode(
-            self.training, len(self.input_dataset), self.neuron_number, [[0.5, -0.5], [0.3, -0.3]], self.mode
+            self.training, len(self.input_dataset), self.neuron_number,
+            [[0.5, -0.5], [0.3, -0.3]], self.initialization
         )
         self.bias = 1
         self.switch = False
@@ -399,6 +400,47 @@ class TestMachineLearningMethods(TestDataMethods):
         expected_weight = 0.5 - 0.01 * 0.1 * 1.0
         self.assertAlmostEqual(weights[i][j], expected_weight, places=2)
 
+    def test_calculate_learning_decay(self):
+        """
+        Тестируем метод _calculate_learning_decay на корректное вычисление уменьшения скорости обучения.
+
+        Этот тест проверяет, что метод _calculate_learning_decay класса MachineLearning
+        корректно вычисляет уменьшение скорости обучения в зависимости от текущей эпохи.
+        """
+        initial_learning_rate = 0.1
+        learning_decay = 0.9
+        epochs = 20
+        # Проверка без изменения learning_rate
+        result = MachineLearning._calculate_learning_decay(
+            0, epochs, initial_learning_rate, learning_decay
+        )
+        self.assertEqual(result, initial_learning_rate)
+        # Проверка с уменьшением learning_rate на первой точке уменьшения
+        result = MachineLearning._calculate_learning_decay(
+            5, epochs, initial_learning_rate, learning_decay
+        )
+        self.assertEqual(result, initial_learning_rate * learning_decay)
+        # Проверка без изменения learning_rate до следующей точки уменьшения
+        result = MachineLearning._calculate_learning_decay(
+            6, epochs, initial_learning_rate * learning_decay, learning_decay
+        )
+        self.assertEqual(result, initial_learning_rate * learning_decay)
+        # Проверка с уменьшением learning_rate на второй точке уменьшения
+        result = MachineLearning._calculate_learning_decay(
+            10, epochs, initial_learning_rate * learning_decay, learning_decay
+        )
+        self.assertEqual(result, initial_learning_rate * learning_decay * learning_decay)
+        # Проверка без изменения learning_rate до следующей точки уменьшения
+        result = MachineLearning._calculate_learning_decay(
+            11, epochs, initial_learning_rate * learning_decay * learning_decay, learning_decay
+        )
+        self.assertEqual(result, initial_learning_rate * learning_decay * learning_decay)
+        # Проверка с уменьшением learning_rate на третьей точке уменьшения
+        result = MachineLearning._calculate_learning_decay(
+            15, epochs, initial_learning_rate * learning_decay * learning_decay, learning_decay
+        )
+        self.assertEqual(result, initial_learning_rate * learning_decay * learning_decay * learning_decay)
+
     def test_update_weights(self):
         """
         Тестируем метод update_weights на корректное обновление весов.
@@ -414,13 +456,12 @@ class TestMachineLearningMethods(TestDataMethods):
         if self.training:
             expected_weights = [
                 [
-                    0.3443205071031966, 0.2577518870314966, -0.07972518088389749,
-                    -0.24147828537403782, 0.010769664995001677, -0.09565929215441041
+                    0.5964545495221815, 0.44658723834843456, -0.13787064484368147,
+                    -0.41796276707265273, 0.0190232926096612, -0.16525191604781783
                 ],
                 [
-                    0.2836973052361836, -0.1968848805465247, -0.023699975638506645,
-                    0.08297770592687338, 0.4076058446309092, 0.004080827696255352
-                ]
+                    0.4914520837710106, -0.3408696702888113, -0.040832142854190186,
+                    0.14401735108711164, 0.7063637180205828, 0.007511823696235307]
             ]
         else:
             expected_weights = [
@@ -468,8 +509,8 @@ class TestMachineLearningMethods(TestDataMethods):
         initial_bias = layer.bias
         data_number = 0
         ml.train(
-            data_number, layer, control.epochs, control.learning_rate, control.error_tolerance,
-            control.regularization, control.lasso_regularization, control.ridge_regularization
+            data_number, layer, control.epochs, control.learning_rate, control.learning_decay,
+            control.error_tolerance, control.regularization, control.lasso_regularization, control.ridge_regularization
         )
         self.assertNotEqual(layer.weights, initial_weights)
         self.assertNotEqual(layer.bias, initial_bias)
@@ -562,7 +603,7 @@ class TestLayerBuilderMethods(TestInitializationFunctions):
         input_size = len(self.input_dataset)
         neuron_number = self.neuron_number
         weights = None
-        mode = self.mode
+        mode = self.initialization
         result = builder._get_weights_mode(self.training, input_size, neuron_number, weights, mode)
         self.assertEqual(len(result), neuron_number)
         self.assertEqual(len(result[0]), input_size)
@@ -580,7 +621,7 @@ class TestLayerBuilderMethods(TestInitializationFunctions):
         input_size = len(self.input_dataset)
         neuron_number = self.neuron_number
         weights = [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]
-        mode = self.mode
+        mode = self.initialization
         result = builder._get_weights_mode(self.training, input_size, neuron_number, weights, mode)
         self.assertEqual(result, weights)
 
@@ -594,7 +635,7 @@ class TestLayerBuilderMethods(TestInitializationFunctions):
         builder = LayerBuilder()
         self.training = True
         bias = 0.0
-        mode = self.mode
+        mode = self.initialization
         result = builder._get_bias_mode(self.training, bias, mode)
         self.assertIsInstance(result, float)
 
@@ -608,7 +649,7 @@ class TestLayerBuilderMethods(TestInitializationFunctions):
         builder = LayerBuilder()
         self.training = False
         bias = 0.5
-        mode = self.mode
+        mode = self.initialization
         result = builder._get_bias_mode(self.training, bias, mode)
         self.assertEqual(result, bias)
 
@@ -631,7 +672,7 @@ class TestLayerBuilderMethods(TestInitializationFunctions):
         корректно вычисляет данные нейронов в зависимости от состояния тренировки объекта.
         """
         if self.training:
-            expected_result = [-6.85630916738443, -3.7775713776491626]
+            expected_result = [-7.4831709848968355, -2.150640709893045]
         else:
             expected_result = [-2.5, -2.3]
         result = self.layer_builder._calculate_neuron_dataset(
@@ -694,7 +735,7 @@ class TestNeuralNetworkMethods(ActivationFunctions, GeneralTestParameters):
         распространяет данные через слой, учитывая состояние тренировки.
         """
         if self.training:
-            expected_result = [-2.922840276534719, 0.46110436654362297]
+            expected_result = [-1.483170984896835, 0.02089294914606696]
         else:
             expected_result = [-2.5, 0.9087119475530022]
         self.assertEqual(
@@ -781,15 +822,15 @@ class TestNeuralNetworkMethods(ActivationFunctions, GeneralTestParameters):
             if self.training:
                 expected_weights = [
                     [
-                        0.3444218515250481, 0.2579544029403025, -0.079428419169155,
-                        -0.24108324970703665, 0.01127472136860852, -0.09506586254958571
+                        0.5965561460783275, 0.44679013192869843, -0.13757405756585417,
+                        -0.4175684373464021, 0.01952839025161246, -0.16465890400124183
                     ],
                     [
-                        0.2837985890347726, -0.19668727392107255, -0.02340304584764419,
-                        0.0833820394550312, 0.4081128851953352, 0.004686855817390256
+                        0.4915535753245859, -0.3406723516335146, -0.04053526445998357,
+                        0.14442192877482674, 0.7068722523818447, 0.008117872403469728
                     ]
                 ]
-                expected_bias = 0.3444218515250481
+                expected_bias = 0.0
             else:
                 expected_weights = [[0.1, 0.2], [0.3, 0.4]]
                 expected_bias = [0.1, 0.2]
@@ -818,7 +859,7 @@ class TestNeuralNetworkMethods(ActivationFunctions, GeneralTestParameters):
                 self.neural_network, '_create_layer', wraps=self.neural_network._create_layer
         ) as mock_create_layer:
             self.neural_network.build_neural_network(
-                control.epochs, control.learning_rate, control.error_tolerance,
+                control.epochs, control.learning_rate, control.learning_decay, control.error_tolerance,
                 control.regularization, control.lasso_regularization, control.ridge_regularization
             )
             self.assertEqual(mock_create_layer.call_count, 3)

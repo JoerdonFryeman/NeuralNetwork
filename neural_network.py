@@ -150,7 +150,7 @@ class NeuralNetwork(Visualisation, MachineLearning, ActivationFunctions, LayerBu
         return layer
 
     def build_neural_network(
-            self, epochs: int, learning_rate: float, error_tolerance: float,
+            self, epochs: int, learning_rate: float, learning_decay: float, error_tolerance: float,
             regularization: float, lasso_regularization: bool, ridge_regularization: bool
     ) -> None:
         """
@@ -163,6 +163,7 @@ class NeuralNetwork(Visualisation, MachineLearning, ActivationFunctions, LayerBu
 
         :param epochs: Количество эпох для обучения.
         :param learning_rate: Скорость обучения.
+        :param learning_decay: Уменьшение скорости обучения.
         :param error_tolerance: Допустимый уровень ошибки.
         :param regularization: Параметр регуляризации.
         :param lasso_regularization: Использовать Lasso регуляризацию.
@@ -185,7 +186,7 @@ class NeuralNetwork(Visualisation, MachineLearning, ActivationFunctions, LayerBu
             self.train_layers_on_dataset(
                 self.data_number,
                 hidden_layer_first, hidden_layer_second, output_outer_layer, epochs, learning_rate,
-                error_tolerance, regularization, lasso_regularization, ridge_regularization
+                learning_decay, error_tolerance, regularization, lasso_regularization, ridge_regularization
             )
             logger.info('Обучение нейронной сети завершено.')
 

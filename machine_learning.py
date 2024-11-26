@@ -35,6 +35,7 @@ class MachineLearning(Data):
     def _get_lasso_regularization(regularization: float, weights: list[list[float]], i: int, j: int) -> float:
         """
         Вычисляет Lasso регуляризацию для данного веса.
+        Добавляет абсолютное значение величины коэффициентов как штраф к функции потерь.
 
         :param regularization: Параметр регуляризации.
         :param weights: Список весов.
@@ -48,6 +49,7 @@ class MachineLearning(Data):
     def _get_ridge_regularization(regularization: float, weights: list[list[float]], i: int, j: int) -> float:
         """
         Вычисляет Ridge регуляризацию для данного веса.
+        Добавляет квадрат величины коэффициентов как штраф к функции потерь.
 
         :param regularization: Параметр регуляризации.
         :param weights: Список весов.
@@ -73,6 +75,21 @@ class MachineLearning(Data):
         :param j: Индекс второй координаты веса.
         """
         weights[i][j] -= learning_rate * gradient * input_dataset[j]
+
+    @staticmethod
+    def _calculate_learning_decay(epoch: int, epochs: int, learning_rate: float, learning_decay: float) -> float:
+        """
+        Вычисляет уменьшение скорости обучения (learning_rate) в зависимости от текущей эпохи.
+
+        :param epoch: Текущая эпоха.
+        :param epochs: Общее количество эпох.
+        :param learning_rate: Текущая скорость обучения.
+        :param learning_decay: Коэффициент уменьшения скорости обучения.
+        :return: Обновленная скорость обучения.
+        """
+        if epoch % (epochs // 4) == 0 and epoch != 0:
+            learning_rate *= learning_decay
+        return learning_rate
 
     def update_weights(
             self, layer, gradient: float, lasso_regularization: bool,
@@ -113,15 +130,15 @@ class MachineLearning(Data):
         :param target: Целевое значение.
         :param layer: Объект слоя.
         """
-        if epoch % 10 == 0:
+        if epoch % 100 == 0:
             print(
                 f'Epoch: {epoch}, error: {self._calculate_error(prediction, target):.1f}%, '
                 f'prediction: {prediction * 10:.4f}, result: {sum(layer.get_layer_dataset()):.4f}'
             )
 
     def train(
-            self, data_number: int, layer, epochs: int, learning_rate: float, error_tolerance: float,
-            regularization: float, lasso_regularization: bool, ridge_regularization: bool
+            self, data_number: int, layer, epochs: int, learning_rate: float, learning_decay: float,
+            error_tolerance: float, regularization: float, lasso_regularization: bool, ridge_regularization: bool
     ) -> tuple[list[list[float]], float]:
         """
         Обучает слой на основании данных.
@@ -130,6 +147,7 @@ class MachineLearning(Data):
         :param data_number: Номер данных.
         :param epochs: Количество эпох для обучения.
         :param learning_rate: Скорость обучения.
+        :param learning_decay: Уменьшение скорости обучения.
         :param error_tolerance: Допустимый уровень ошибки.
         :param regularization: Параметр регуляризации.
         :param lasso_regularization: Использовать Lasso регуляризацию.
@@ -145,6 +163,7 @@ class MachineLearning(Data):
                 layer, gradient, lasso_regularization, ridge_regularization, learning_rate, regularization
             )
             self.__get_train_visualisation(epoch, prediction, target, layer)
+            learning_rate = self._calculate_learning_decay(epoch, epochs, learning_rate, learning_decay)
             if abs(prediction - target) < error_tolerance:
                 return layer.weights, layer.bias
 
@@ -163,7 +182,7 @@ class MachineLearning(Data):
 
     def train_layers_on_dataset(
             self, data_number: int, hidden_layer_first, hidden_layer_second,
-            output_outer_layer, epochs: int, learning_rate: float, error_tolerance: float,
+            output_outer_layer, epochs: int, learning_rate: float, learning_decay: float, error_tolerance: float,
             regularization: float, lasso_regularization: bool, ridge_regularization: bool
     ) -> None:
         """
@@ -175,6 +194,7 @@ class MachineLearning(Data):
         :param output_outer_layer: Выходной слой.
         :param epochs: Количество эпох для обучения.
         :param learning_rate: Скорость обучения.
+        :param learning_decay: Уменьшение скорости обучения.
         :param error_tolerance: Допустимый уровень ошибки.
         :param regularization: Параметр регуляризации.
         :param lasso_regularization: Использовать Lasso регуляризацию.
@@ -186,19 +206,19 @@ class MachineLearning(Data):
         for i in range(len(self.dataset[self.data_name])):
             hidden_layer_first.input_dataset = self.get_data_sample()
             self.train(
-                data_number, hidden_layer_first, epochs, learning_rate,
+                data_number, hidden_layer_first, epochs, learning_rate, learning_decay,
                 error_tolerance, regularization, lasso_regularization, ridge_regularization
             )
 
             hidden_layer_second.input_dataset = hidden_layer_first.get_layer_dataset()
             self.train(
-                data_number, hidden_layer_second, epochs, learning_rate,
+                data_number, hidden_layer_second, epochs, learning_rate, learning_decay,
                 error_tolerance, regularization, lasso_regularization, ridge_regularization
             )
 
             output_outer_layer.input_dataset = hidden_layer_second.get_layer_dataset()
             self.train(
-                data_number, output_outer_layer, epochs, learning_rate,
+                data_number, output_outer_layer, epochs, learning_rate, learning_decay,
                 error_tolerance, regularization, lasso_regularization, ridge_regularization
             )
 
