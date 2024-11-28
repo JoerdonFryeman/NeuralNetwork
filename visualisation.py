@@ -1,8 +1,43 @@
-class Visualisation:
+from support_functions import ActivationFunctions
+
+
+class Visualisation(ActivationFunctions):
+    """Класс предоставляет функции для визуализации процесса обучения и результатов работы нейронной сети."""
+
+    @staticmethod
+    def get_train_visualisation(epoch, calculate_error, prediction, target, layer):
+        """
+        Выводит визуализацию процесса обучения.
+
+        :param calculate_error: Метод вычисления ошибки.
+        :param epoch: Эпоха.
+        :param prediction: Предсказанное значение.
+        :param target: Целевое значение.
+        :param layer: Объект слоя.
+        """
+        if epoch % 100 == 0:
+            print(
+                f'Epoch: {epoch}, error: {calculate_error(prediction, target):.1f}%, '
+                f'prediction: {prediction * 10:.4f}, result: {sum(layer.get_layer_dataset()):.4f}'
+            )
+
+    @staticmethod
+    def get_train_layers_on_dataset_visualisation(data_number, output_layer):
+        """
+        Выводит визуальное представление результатов обучения для текущего набора данных.
+
+        :param data_number: Номер данных.
+        :param output_layer: Выходной слой.
+        """
+        print(
+            f'\nОбучение грани куба {data_number} завершено, результат: '
+            f'{sum(output_layer.get_layer_dataset()) * 10:.0f}\n'
+        )
+
     @staticmethod
     def __print_visualisation(output_sum: float) -> None:
         """
-        Выводит графическое представление результата.
+        Выводит графическое представление результата и интерпретирует значение.
 
         :param output_sum: Сумма выходных данных.
         """
@@ -15,17 +50,19 @@ class Visualisation:
             6: ["  ●   ●  ", "  ●   ●  ", "  ●   ●  "],
         }
 
-        if output_sum < 0.5:
+        margin = 0.0004  # Приемлемое отклонение
+
+        if abs(output_sum - 0.0329) < margin:
             face = 1
-        elif 0.5 < output_sum < 0.9:
+        elif abs(output_sum - 0.0309) < margin:
             face = 2
-        elif 0.9 < output_sum < 1.2:
+        elif abs(output_sum - 0.0514) < margin:
             face = 3
-        elif 1.25 < output_sum < 1.26:
-            face = 5
-        elif 1.27 < output_sum < 1.28:
+        elif abs(output_sum - 0.0591) < margin:
             face = 4
-        elif 2.8 < output_sum < 3.0:
+        elif abs(output_sum - 0.0648) < margin:
+            face = 5
+        elif abs(output_sum - 0.0304) < margin:
             face = 6
         else:
             print('Не могу интерпретировать значение результата!')
@@ -53,7 +90,7 @@ class Visualisation:
             result = layer.get_layer_dataset()
             print(f'Данные слоя: {[float(f"{i:.2f}") for i in result]}\n')
 
-            if name == 'output_outer_layer':
-                output_sum = float(sum(result))
+            if name == 'hidden_layer_second':
+                output_sum = self.get_sigmoid(sum(result))
                 print(f'Выходные данные: {output_sum:.4f}')
                 self.__print_visualisation(output_sum)

@@ -1,4 +1,6 @@
 class ActivationFunctions:
+    """Класс предоставляет реализации различных используемых в нейронных сетях активационных функций."""
+
     @staticmethod
     def get_linear(x: float) -> float:
         """
@@ -89,15 +91,17 @@ class ActivationFunctions:
         """
         if isinstance(x, (float, int)):
             x = [x]
-
-        exp_values: list[float] = [self.__exp(i) for i in x]
+        max_val = max(x)
+        exp_values: list[float] = [self.__exp(i - max_val) for i in x]
         sum_exp: float = sum(exp_values)
         return [i / sum_exp for i in exp_values]
 
 
 class InitializationFunctions:
+    """Класс содержит методы для инициализации весов нейронных сетей."""
+
     @staticmethod
-    def get_uniform_initialization(value: float) -> tuple[float, float]:
+    def get_uniform(value: float = 0.5) -> tuple[float, float]:
         """
         Возвращает границы диапазона для равномерной инициализации.
         :param value: Граница диапазона.
@@ -106,7 +110,7 @@ class InitializationFunctions:
         return -value, value
 
     @staticmethod
-    def get_xavier_initialization(input_size: int, output_size: int) -> tuple[float, float]:
+    def get_xavier(input_size: int, output_size: int) -> tuple[float, float]:
         """
         Функция инициализации Ксавьер.
         Вычисляется граница диапазона как квадратный корень из 6,
@@ -119,7 +123,7 @@ class InitializationFunctions:
         return -limit, limit
 
     @staticmethod
-    def get_he_initialization(input_size: int) -> tuple[float, float]:
+    def get_he(input_size: int) -> tuple[float, float]:
         """
         Функция инициализации He.
         Вычисляется граница диапазона как квадратный корень из 2, деленного на количество входных нейронов.

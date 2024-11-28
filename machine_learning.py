@@ -1,9 +1,12 @@
 import pickle
 from configuration import logger
 from data import Data
+from visualisation import Visualisation
 
 
-class MachineLearning(Data):
+class MachineLearning(Visualisation, Data):
+    """Класс отвечает за процесс обучения модели."""
+
     @staticmethod
     def _save_weights_and_biases(weights: dict[str, list[list[float]]], biases: dict[str, list[float]]) -> None:
         """
@@ -91,7 +94,7 @@ class MachineLearning(Data):
             learning_rate *= learning_decay
         return learning_rate
 
-    def update_weights(
+    def _update_weights(
             self, layer, gradient: float, lasso_regularization: bool,
             ridge_regularization: bool, learning_rate: float, regularization: float
     ) -> None:
@@ -121,22 +124,7 @@ class MachineLearning(Data):
                     )
         layer.bias -= learning_rate * gradient
 
-    def __get_train_visualisation(self, epoch, prediction, target, layer):
-        """
-        Выводит визуализацию процесса обучения.
-
-        :param epoch: Эпоха.
-        :param prediction: Предсказанное значение.
-        :param target: Целевое значение.
-        :param layer: Объект слоя.
-        """
-        if epoch % 100 == 0:
-            print(
-                f'Epoch: {epoch}, error: {self._calculate_error(prediction, target):.1f}%, '
-                f'prediction: {prediction * 10:.4f}, result: {sum(layer.get_layer_dataset()):.4f}'
-            )
-
-    def train(
+    def _train(
             self, data_key: str, layer, epochs: int, learning_rate: float, learning_decay: float,
             error_tolerance: float, regularization: float, lasso_regularization: bool, ridge_regularization: bool
     ) -> tuple[list[list[float]], float]:
@@ -159,38 +147,23 @@ class MachineLearning(Data):
             prediction: float = sum(layer.get_layer_dataset())
             target: float = self.get_target_value_by_key(data_key)
             gradient: float = prediction - target
-            self.update_weights(
+            self._update_weights(
                 layer, gradient, lasso_regularization, ridge_regularization, learning_rate, regularization
             )
-            self.__get_train_visualisation(epoch, prediction, target, layer)
+            self.get_train_visualisation(epoch, self._calculate_error, prediction, target, layer)
             learning_rate = self._calculate_learning_decay(epoch, epochs, learning_rate, learning_decay)
             if abs(prediction - target) < error_tolerance:
                 return layer.weights, layer.bias
 
-    @staticmethod
-    def __get_train_layers_on_dataset_visualisation(data_number, output_outer_layer):
-        """
-        Выводит визуальное представление результатов обучения для текущего набора данных.
-
-        :param data_number: Номер данных.
-        :param output_outer_layer: Выходной слой.
-        """
-        print(
-            f'\nОбучение грани куба {data_number} завершено, результат: '
-            f'{sum(output_outer_layer.get_layer_dataset()) * 10:.0f}\n'
-        )
-
     def train_layers_on_dataset(
-            self, hidden_layer_first, hidden_layer_second,
-            output_outer_layer, epochs: int, learning_rate: float, learning_decay: float, error_tolerance: float,
-            regularization: float, lasso_regularization: bool, ridge_regularization: bool
+            self, hidden_layer_first, hidden_layer_second, epochs: int, learning_rate: float, learning_decay: float,
+            error_tolerance: float, regularization: float, lasso_regularization: bool, ridge_regularization: bool
     ) -> None:
         """
         Обучает несколько слоев на наборе данных.
 
         :param hidden_layer_first: Первый скрытый слой.
         :param hidden_layer_second: Второй скрытый слой.
-        :param output_outer_layer: Выходной слой.
         :param epochs: Количество эпох для обучения.
         :param learning_rate: Скорость обучения.
         :param learning_decay: Уменьшение скорости обучения.
@@ -205,28 +178,21 @@ class MachineLearning(Data):
         for data_key, data_samples in self.dataset[self.data_name].items():
             for _ in data_samples:
                 hidden_layer_first.input_dataset = self.get_data_sample()
-                self.train(
+                self._train(
                     data_key, hidden_layer_first, epochs, learning_rate, learning_decay,
                     error_tolerance, regularization, lasso_regularization, ridge_regularization
                 )
                 hidden_layer_second.input_dataset = hidden_layer_first.get_layer_dataset()
-                self.train(
+                self._train(
                     data_key, hidden_layer_second, epochs, learning_rate, learning_decay,
                     error_tolerance, regularization, lasso_regularization, ridge_regularization
                 )
-                output_outer_layer.input_dataset = hidden_layer_second.get_layer_dataset()
-                self.train(
-                    data_key, output_outer_layer, epochs, learning_rate, learning_decay,
-                    error_tolerance, regularization, lasso_regularization, ridge_regularization
-                )
-                self.__get_train_layers_on_dataset_visualisation(data_key, output_outer_layer)
+                self.get_train_layers_on_dataset_visualisation(data_key, hidden_layer_second)
 
         weights['hidden_layer_first'] = hidden_layer_first.weights
         weights['hidden_layer_second'] = hidden_layer_second.weights
-        weights['output_outer_layer'] = output_outer_layer.weights
 
         biases['hidden_layer_first'] = hidden_layer_first.bias
         biases['hidden_layer_second'] = hidden_layer_second.bias
-        biases['output_outer_layer'] = output_outer_layer.bias
 
         self._save_weights_and_biases(weights, biases)

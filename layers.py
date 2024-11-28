@@ -4,11 +4,7 @@ from support_functions import InitializationFunctions
 
 
 class LayerBuilder(InitializationFunctions):
-    """
-    Класс для построения слоёв нейронной сети.
-    Содержит методики для генерации весов, вычисления данных нейронов и различных активационных функций.
-    """
-    _test_mode: bool = False
+    """Класс предназначен для создания слоёв нейронной сети."""
 
     def __repr__(self) -> str:
         """
@@ -17,188 +13,161 @@ class LayerBuilder(InitializationFunctions):
         """
         return f'Модуль: {__name__}; Класс: {self.__class__.__name__}; Адрес в памяти: {hex(id(self))}\n'
 
-    def _select_initialization_function(
-            self, mode: str, input_size: int = None, neuron_number: int = None, for_bias: bool = False
+    def _select_init_func(
+            self, init_func: str, input_size: int = None,
+            neuron_number: int = None, for_bias: bool = False
     ) -> float | tuple[float, float]:
         """
-        Выбирает метод инициализации и возвращает сгенерированные значения.
+        Выбирает и применяет метод инициализации параметров для слоя нейронной сети.
 
-        :param mode: Режим инициализации ('uniform', 'xavier', 'he').
-        :param input_size: Размер входных данных (для 'xavier' и 'he').
-        :param neuron_number: Размер выходных данных (для 'xavier').
-        :param for_bias: Флаг для инициализации смещений.
-        :return: Инициализированные значения в зависимости от режима (либо кортеж с границами диапазона, либо 0.0 для смещения).
-        :raises ValueError: Если режим инициализации неизвестен.
+        :param init_func: Метод инициализации ('uniform', 'xavier', 'he').
+        :param input_size: Количество входных нейронов (необходимо для 'xavier' и 'he').
+        :param neuron_number: Количество выходных нейронов (необходимо для 'xavier').
+        :param for_bias: Флаг, указывающий, требуется ли инициализация для смещения. По умолчанию False.
+
+        :return: Инициализированное значение или кортеж инициализированных значений в зависимости от выбранного метода.
+        :raises ValueError: Выбрасывается, если init_func не соответствует ни одному из поддерживаемых методов инициализации.
         """
+        # Если параметр for_bias установлен в True, возвращается нулевое смещение, так как смещение не требует особой инициализации.
         if for_bias:
             return 0.0
-        if mode == 'uniform':
-            return self.get_uniform_initialization(0.5)
-        elif mode == 'xavier':
-            return self.get_xavier_initialization(input_size, neuron_number)
-        elif mode == 'he':
-            return self.get_he_initialization(input_size)
-        else:
-            raise ValueError(f'Неизвестный режим инициализации: {mode}')
+        # Словарь сопоставляет названия методов инициализации с соответствующими лямбда-функциями.
+        # Каждая лямбда-функция вызывает метод для определенного режима инициализации.
+        init_funcs_dict = {
+            'uniform': lambda: self.get_uniform(),
+            'xavier': lambda: self.get_xavier(input_size, neuron_number),
+            'he': lambda: self.get_he(input_size)
+        }
+        if init_func not in init_funcs_dict:
+            raise ValueError(f'Неизвестный режим инициализации: {init_func}')
+        # Возвращаем результат выполнения соответствующей функции инициализации из словаря.
+        return init_funcs_dict[init_func]()
 
-    def _get_weights_mode(
-            self, training, input_size: int, neuron_number: int, weights: list[list[float]] | None, mode: str
+    def select_weights_mode(
+            self, training, input_size: int, neuron_number: int,
+            weights: list[list[float]] | None, init_func: str, test_mode: bool
     ) -> list[list[float]]:
         """
-        Инициализирует веса для слоёв нейронной сети.
+        Определяет и инициализирует режим весов для слоя нейронной сети.
 
-        :param input_size: Размер входных данных.
-        :param neuron_number: Количество нейронов.
-        :param weights: Существующие веса, если они есть.
-        :param mode: Режим инициализации ('uniform', 'xavier', 'he').
-        :return: Инициализированные веса.
+        :param training: Флаг, указывающий на режим обучения. Если True, инициируются новые веса.
+        :param input_size: Количество входных нейронов.
+        :param neuron_number: Количество выходных нейронов.
+        :param weights: Существующий список весов или None, если веса нужно инициализировать.
+        :param init_func: Метод инициализации весов ('uniform', 'xavier', 'he').
+        :param test_mode: Флаг, указывающий на тестовый режим. При тестовом режиме перед инициализацией задается фиксированное начальное значение для генератора случайных чисел для воспроизводимости.
+
+        :return: Список инициализированных весов, если текущий режим обучения или веса отсутствуют. В противном случае возвращает переданные веса.
         """
+        # Проверяет, находится ли модель в режиме обучения или установлены ли веса.
         if training or not weights:
-            if self._test_mode:
+            # Если активирован тестовый режим, устанавливается фиксированное значение для генератора случайных чисел.
+            if test_mode:
                 seed(0)
             logger.info(f'Инициализация весов для входных данных размером {input_size} и {neuron_number} нейронов.')
-            limits: float | tuple[float, float] = self._select_initialization_function(mode, input_size, neuron_number)
+            # Получение пределов инициализации, вызывается select_init_func с соответствующими параметрами.
+            limits: float | tuple[float, float] = self._select_init_func(init_func, input_size, neuron_number)
+            # Создаёт и возвращает двумерный список весов, используя переданные пределы для каждого нейрона.
             return [[uniform(*limits) for _ in range(input_size)] for _ in range(neuron_number)]
+        # Если веса уже установлены и модель не в режиме обучения, возвращает существующие веса.
         return weights
 
-    def _get_bias_mode(self, training, bias: float, mode: str) -> float | tuple[float, float]:
+    def select_bias_mode(
+            self, training, bias: float, init_func: str, test_mode: bool
+    ) -> float | tuple[float, float]:
         """
-        Инициализирует смещения для слоёв нейронной сети.
+        Определяет и инициализирует режим смещения (bias) для слоя нейронной сети.
 
-        :param bias: Существующие смещения, если они есть.
-        :param mode: Режим инициализации ('uniform', 'xavier', 'he').
-        :return: Инициализированные смещения.
+        :param training: Флаг, указывающий на режим обучения. Если True, инициируются новое смещение.
+        :param bias: Текущее значение смещения или 0, если оно должно быть инициализировано.
+        :param init_func: Метод инициализации смещения ('uniform', 'xavier', 'he').
+        :param test_mode: Флаг, указывающий на тестовый режим. При тестовом режиме перед инициализацией задается фиксированное начальное значение для генератора случайных чисел для воспроизводимости.
+
+        :return: Инициализированное значение смещения или диапазон инициализированных значений в зависимости от выбранного метода. Если режим обучения выключен и смещение уже задано, возвращает текущее значение смещения.
         """
         if training or not bias:
-            if self._test_mode:
+            if test_mode:
                 seed(0)
             logger.info(f'Инициализация смещений.')
-            limits: tuple[float, float] = self._select_initialization_function(mode, for_bias=(mode != 'uniform'))
-            if mode == 'uniform':
+            # Получает пределы инициализации, вызывая select_init_func с параметром for_bias,
+            # который равен True, если метод инициализации не 'uniform'.
+            limits: tuple[float, float] = self._select_init_func(init_func, for_bias=(init_func != 'uniform'))
+            # Если метод инициализации 'uniform', возвращает случайное число внутри полученных пределов.
+            if init_func == 'uniform':
                 return uniform(*limits)
+            # Для других методов возвращает сами пределы.
             return limits
+        # Если смещение уже задано и модель не в режиме обучения, возвращает текущее смещение.
         return bias
 
     @staticmethod
-    def _verify_switch_type(switch: bool | list[bool], neuron_number: int) -> list[bool]:
-        """
-        Проверяет тип переключателя для нейронов.
-        :param switch: Булевое значение или список булевых значений.
-        :param neuron_number: Количество нейронов.
-        :return: Список булевых значений.
-        """
-        if isinstance(switch, bool):
-            logger.info(f'Преобразование булевого значения {switch} в список из {neuron_number} элементов.')
-            return [switch] * neuron_number
-        elif isinstance(switch, list):
-            logger.info(f'Использование переданного списка булевых значений {switch}.')
-            return switch
-        raise ValueError(f'Ожидался тип bool или list[bool], но получен {type(switch).__name__}')
-
-    @classmethod
-    def _calculate_neuron_dataset(
-            cls, input_dataset: list[int | float], neuron_number: int,
-            weights: list[list[int | float]], bias: float, switch: bool | list[bool]
+    def calculate_neuron_dataset(
+            input_dataset: list[int | float], neuron_number: int, weights: list[list[int | float]],
+            bias: float, activate_func: callable, switch: bool, test_mode: bool
     ) -> list[float]:
         """
-        Вычисляет значения массива данных нейронов с заданными параметрами.
-        :param input_dataset: Список входных данных.
-        :param neuron_number: Количество нейронов.
-        :param weights: Список весов нейронов.
-        :param bias: Смещение.
-        :param switch: Булевое значение или список булевых значений.
-        :return: Список результатов обработки данных нейронов.
-        """
-        if cls._test_mode:
-            seed(0)  # Фиксация предсказуемых значений для тестирования
-        logger.info(f'Вычисление данных для {neuron_number} нейронов с bias={bias}.')
-        neuron_dataset: list[list[float]] = []
-        switch_list: list[bool] = cls._verify_switch_type(switch, neuron_number)
-        for n in range(neuron_number):
-            neuron_dataset.append(
-                [i * w + bias if switch_list[n] else i * w - bias for i, w in zip(input_dataset, weights[n])]
-            )
-        result: list[float] = [sum(i) for i in neuron_dataset]
-        logger.info(f'Результаты вычислений: {result}')
-        return result
+        Вычисляет выходные данные для заданного количества нейронов на основе входных данных и весов.
 
+        :param input_dataset: Список входных данных для нейронов.
+        :param neuron_number: Количество нейронов, для которых необходимо произвести вычисления.
+        :param weights: Двумерный список весов для каждого нейрона.
+        :param bias: Смещение, которое будет добавлено или вычтено из взвешенной суммы, в зависимости от параметра switch.
+        :param activate_func: Функция активации, применяемая к взвешенной сумме для каждого нейрона.
+        :param switch: Логический флаг, определяющий, будет ли смещение добавлено (если True) или вычтено (если False) из взвешенной суммы.
+        :param test_mode: Флаг, указывающий на тестовый режим. При включенном тестовом режиме задается фиксированное начальное значение для генератора случайных чисел для воспроизводимости.
 
-class OuterLayer(LayerBuilder):
-    """
-    Класс внешнего слоя нейронной сети, наследуется от LayerBuilder.
-    Выполняет начальную или итоговую обработку данных, применяя указанную активационную функцию.
-    """
-
-    def __init__(
-            self, training, initialization, input_dataset: list[int | float],
-            weights: list[list[float]], bias: float | tuple[float, float],
-            activation_function_first: callable, activation_function_second: callable, switch_list: list[bool]
-    ):
+        :return: Список значений, вычисленных для каждого нейрона после применения функции активации.
         """
-        Инициализирует входной слой.
-        :param input_dataset: Список входных данных.
-        :param activation_function_first: Функция активации первого нейрона.
-        :param activation_function_second: Функция активации второго нейрона.
-        """
-        if self._test_mode:
+        if test_mode:
             seed(0)
-        self.input_dataset: list[int | float] = input_dataset
-        self.__neuron_number: int = 2
-        self.weights: list[list[float]] = self._get_weights_mode(
-            training, len(input_dataset), self.__neuron_number, weights, initialization
-        )
-        self.bias: float | tuple[float, float] = self._get_bias_mode(training, bias, initialization)
-        self.activation_function_first: callable = activation_function_first
-        self.activation_function_second: callable = activation_function_second
-        self.switch_list: list[bool] = switch_list
-
-    def get_layer_dataset(self) -> list[float]:
-        """
-        Получает массив данных слоя с примененной активационной функцией.
-        :return: Список значений после применения активационной функции.
-        """
-        neuron_data_first, neuron_data_second = self._calculate_neuron_dataset(
-            self.input_dataset, self.__neuron_number, self.weights, self.bias, self.switch_list
-        )
-        logger.debug(self)
-        return [self.activation_function_first(neuron_data_first), self.activation_function_second(neuron_data_second)]
+        logger.info(f'Вычисление данных для {neuron_number} нейронов с bias={bias}. Используя switch={switch}')
+        # Инициализация списка для хранения результатов вычислений нейронов.
+        neuron_dataset: list[float] = []
+        # Проходим по каждому нейрону
+        for n in range(neuron_number):
+            # Для каждого нейрона вычисляется взвешенная сумма входных данных и соответствующих весов.
+            # Если `switch` равен `True`, то к каждой взвешенной сумме добавляется смещение `bias`.
+            # Если `switch` равен `False`, то смещение вычитается.
+            neuron_output = sum(i * w + bias if switch else i * w - bias for i, w in zip(input_dataset, weights[n]))
+            # Результат взвешенной суммы передается функции активации,
+            # и результат этой функции добавляется в список результатов.
+            neuron_dataset.append(activate_func(neuron_output))
+        logger.info(f'Результаты вычислений: {neuron_dataset}')
+        return neuron_dataset
 
 
 class HiddenLayer(LayerBuilder):
-    """
-    Класс для скрытого слоя нейронной сети, наследуется от LayerBuilder.
-    Обрабатывает данные слоями, создавая сложные представления входных данных.
-    """
+    """Класс представляет собой скрытый слой нейронной сети."""
 
     def __init__(
-            self, training, initialization, input_dataset: list[int | float],
+            self, training, init_func, input_dataset: list[int | float],
             weights: list[list[float]], bias: float | tuple[float, float],
-            neuron_number: int, activation_function: callable, switch: bool
+            neuron_number: int, activate_func: callable, switch: bool, test_mode: bool
     ):
-        """
-        Инициализирует скрытый слой.
-        :param input_dataset: Список входных данных.
-        :param neuron_number: Количество нейронов.
-        :param activation_function: Функция активации для слоя.
-        """
-        if self._test_mode:
+        if test_mode:
             seed(0)
         self.input_dataset: list[int | float] = input_dataset
         self.neuron_number: int = neuron_number
-        self.weights: list[list[float]] = self._get_weights_mode(
-            training, len(input_dataset), neuron_number, weights, initialization
+        self.weights: list[list[float]] = self.select_weights_mode(
+            training, len(input_dataset), neuron_number, weights, init_func, test_mode
         )
-        self.bias: float | tuple[float, float] = self._get_bias_mode(training, bias, initialization)
-        self.activation_function: callable = activation_function
+        self.bias: float | tuple[float, float] = self.select_bias_mode(
+            training, bias, init_func, test_mode
+        )
+        self.activate_func: callable = activate_func
         self.switch: bool = switch
+        self.test_mode = test_mode
 
     def get_layer_dataset(self) -> list[float]:
         """
-        Получает массив данных слоя с примененной активационной функцией.
-        :return: Список значений после применения активационной функции.
+        Вычисляет и возвращает выходы слоя с учетом весов, смещений и функции активации.
+
+        :return: Список значений, представляющих выходы каждого нейрона после применения функции активации.
         """
-        result: list[float] = self._calculate_neuron_dataset(
-            self.input_dataset, self.neuron_number, self.weights, self.bias, self.switch
+        # Вызывается метод calculate_neuron_dataset для расчета выходных данных каждого нейрона.
+        result: list[float] = self.calculate_neuron_dataset(
+            self.input_dataset, self.neuron_number, self.weights, self.bias,
+            self.activate_func, self.switch, self.test_mode
         )
         logger.debug(self)
-        return [self.activation_function(i) for i in result]
+        return result

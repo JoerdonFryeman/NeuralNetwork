@@ -4,57 +4,61 @@ from neural_network import NeuralNetwork
 
 
 class Control:
-    """
-    Класс для управления параметрами конфигурации нейронной сети.
-
-    Атрибуты:
-    ----------
-    training : bool
-        Указывает, находится ли сеть в режиме тренировки. По умолчанию False.
-    initialization : str
-        Метод инициализации весов сети. Например, 'xavier'. По умолчанию 'xavier'.
-    epochs : int
-        Количество эпох для обучения. По умолчанию 1000.
-    learning_rate : float
-        Скорость обучения нейронной сети. По умолчанию 0.001.
-    error_tolerance : float
-        Допустимый уровень ошибки для обучения. По умолчанию 0.001.
-    regularization : float
-        Параметр регуляризации для предотвращения переобучения. По умолчанию 0.001.
-    lasso_regularization : bool
-        Включение или отключение Lasso регуляризации. По умолчанию False.
-    ridge_regularization : bool
-        Включение или отключение Ridge регуляризации. По умолчанию True.
-    """
+    """Класс управляет параметрами и характеристиками нейронной сети."""
 
     def __init__(self):
-        """Инициализирует объект Control с параметрами по умолчанию."""
+        """
+        Инициализирует объект класса с параметрами по умолчанию.
+
+        :param training (bool): Флаг режима обучения. По умолчанию False.
+        :param init_func (str): Метод инициализации весов сети. По умолчанию 'xavier'.
+        :param epochs (int): Количество эпох обучения. По умолчанию 1000.
+        :param learning_rate (float): Начальная скорость обучения. По умолчанию 0.001.
+        :param learning_decay (float): Коэффициент уменьшения скорости обучения. По умолчанию 0.009.
+        :param error_tolerance (float): Допустимый предел ошибок. По умолчанию 0.001.
+        :param regularization (float): Коэффициент регуляризации. По умолчанию 0.001.
+        :param lasso_regularization (bool): Флаг использования L1 регуляризации. По умолчанию False.
+        :param ridge_regularization (bool): Флаг использования L2 регуляризации. По умолчанию True.
+        :param test_mode (bool): Флаг тестового режима. По умолчанию False.
+        """
         self.training: bool = False
-        self.initialization: str = 'xavier'
+        self.init_func: str = 'xavier'
         self.epochs: int = 1000
         self.learning_rate: float = 0.001
-        self.learning_decay = 0.00995
+        self.learning_decay = 0.009
         self.error_tolerance: float = 0.001
         self.regularization: float = 0.001
-        self.lasso_regularization: bool = True
+        self.lasso_regularization: bool = False
         self.ridge_regularization: bool = True
+        self.test_mode: bool = False
 
 
-def initialize_objects(control: Control):
+def init_objects(control: Control) -> tuple[Data, NeuralNetwork]:
+    """
+    Инициализирует и возвращает объекты данных и нейронной сети на основе заданного контроля параметров.
+
+    :param control: Объект Control, содержащий параметры обучения и конфигурации для нейронной сети.
+    :return: Кортеж, содержащий объекты Data и NeuralNetwork, готовые для использования.
+    """
     data = Data()
-    network = NeuralNetwork(control.training, control.initialization, data.get_data_sample())
+    network = NeuralNetwork(control.training, control.init_func, data.get_data_sample())
     return data, network
 
 
-def main():
-    """Основная функция, которая запускает процесс создания и визуализации нейронной сети."""
+def main() -> None:
+    """
+    Главная функция программы, запускающая процесс создания и обучения нейронной сети.
+
+    Инициализирует параметры управления, создает объекты данных и нейронной сети,
+    а затем начинает процесс обучения сети, обрабатывая любые возникшие ошибки в процессе.
+    """
     control = Control()
-    data, network = initialize_objects(control)
+    data, network = init_objects(control)
     try:
         logger.info("Начало построения нейронной сети.")
         network.build_neural_network(
             control.epochs, control.learning_rate, control.learning_decay, control.error_tolerance,
-            control.regularization, control.lasso_regularization, control.ridge_regularization
+            control.regularization, control.lasso_regularization, control.ridge_regularization, control.test_mode
         )
         logger.info("Построение нейронной сети завершено.")
     except ValueError as error:
