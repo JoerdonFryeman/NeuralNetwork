@@ -1,4 +1,5 @@
 import pickle
+
 from configuration import logger
 from data import Data
 from visualisation import Visualisation

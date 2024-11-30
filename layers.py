@@ -1,4 +1,5 @@
 from random import uniform, seed
+
 from configuration import logger
 from support_functions import InitializationFunctions
 

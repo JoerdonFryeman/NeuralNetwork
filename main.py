@@ -25,7 +25,7 @@ class Control:
         self.init_func: str = 'xavier'
         self.epochs: int = 1000
         self.learning_rate: float = 0.001
-        self.learning_decay = 0.009
+        self.learning_decay: float = 0.009
         self.error_tolerance: float = 0.001
         self.regularization: float = 0.001
         self.lasso_regularization: bool = False

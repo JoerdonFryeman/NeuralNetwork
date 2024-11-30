@@ -1,4 +1,5 @@
 from pickle import load
+
 from configuration import logger
 from layers import LayerBuilder, HiddenLayer
 from machine_learning import MachineLearning
