@@ -10,7 +10,7 @@ def get_json_data(name: str) -> dict:
     :raises FileNotFoundError: Если файл не найден.
     """
     try:
-        with open(f'{name}.json', encoding='UTF-8') as file:
+        with open(f'config_files/{name}.json', encoding='UTF-8') as file:
             data = load(file)
         return data
     except FileNotFoundError:

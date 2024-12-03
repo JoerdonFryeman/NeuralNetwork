@@ -1,6 +1,6 @@
 from pickle import load
 
-from configuration import logger
+from config_files.configuration import logger
 from layers import LayerBuilder, HiddenLayer
 from machine_learning import MachineLearning
 from support_functions import ActivationFunctions
@@ -95,7 +95,7 @@ class NeuralNetwork(MachineLearning, ActivationFunctions, LayerBuilder):
         """
         try:
             # Пытается загрузить веса и смещения из файла.
-            data: dict = self._load_weights_and_biases('weights_and_biases.pkl')
+            data: dict = self._load_weights_and_biases('weights_and_biases/weights_and_biases.pkl')
             logger.info(f'Веса и смещения для слоя "{layer_name}" успешно загружены и установлены.')
         except FileNotFoundError:
             logger.error('Файл weights_and_biases.pkl не найден.')
@@ -134,16 +134,18 @@ class NeuralNetwork(MachineLearning, ActivationFunctions, LayerBuilder):
         """
         hidden_layer_first = self._create_layer(
             HiddenLayer, 'hidden_layer_first',
-            self.input_dataset, 12, self.get_tanh, True, test_mode
+            self.input_dataset, 24, self.get_tanh, True, test_mode
         )
         hidden_layer_second = self._create_layer(
             HiddenLayer, 'hidden_layer_second',
-            self._propagate(hidden_layer_first), 12, self.get_tanh, True, test_mode
+            self._propagate(hidden_layer_first), 24, self.get_tanh, True, test_mode
         )
+        output_layer = self.get_sigmoid(sum(self._propagate(hidden_layer_second)))
+
         if self.training:
             self.train_layers_on_dataset(
                 hidden_layer_first, hidden_layer_second, epochs, learning_rate, learning_decay,
                 error_tolerance, regularization, lasso_regularization, ridge_regularization
             )
             logger.info('Обучение нейронной сети завершено.')
-        self.get_visualisation(self.input_dataset, self.layers)
+        self.get_visualisation(self.input_dataset, self.layers, output_layer)

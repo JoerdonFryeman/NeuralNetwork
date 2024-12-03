@@ -1,7 +1,8 @@
-from support_functions import ActivationFunctions
+from config_files.configuration import get_json_data
+from support_functions import ActivationFunctions, OtherFunctions
 
 
-class Visualisation(ActivationFunctions):
+class Visualisation(ActivationFunctions, OtherFunctions):
     """Класс предоставляет функции для визуализации процесса обучения и результатов работы нейронной сети."""
 
     @staticmethod
@@ -15,7 +16,7 @@ class Visualisation(ActivationFunctions):
         :param target: Целевое значение.
         :param layer: Объект слоя.
         """
-        if epoch % 100 == 0:
+        if epoch % 50 == 0:
             print(
                 f'Epoch: {epoch}, error: {calculate_error(prediction, target):.1f}%, '
                 f'prediction: {prediction * 10:.4f}, result: {sum(layer.get_layer_dataset()):.4f}'
@@ -35,51 +36,53 @@ class Visualisation(ActivationFunctions):
         )
 
     @staticmethod
-    def __print_visualisation(output_sum: float) -> None:
+    def _find_closest_average(output_sum: float, averages: dict[int, float], margin: float = float('inf')) -> int:
+        """Находит среднее значение, наиболее близкое к output_sum с учётом margin"""
+        data_class_name, min_difference = None, margin
+        for name, average in averages.items():
+            difference = abs(output_sum - average)
+            if difference < min_difference:
+                min_difference = difference
+                data_class_name = name
+        return data_class_name
+
+    def _calculate_classes_average(self, output_sum: float):
+        """Вычисляет среднеарифметическое значение для каждого класса данных."""
+        averages = {
+            1: self.calculate_average([0.00, 0.00]),
+            2: self.calculate_average([0.00, 0.00]),
+            3: self.calculate_average([0.00, 0.00]),
+            4: self.calculate_average([0.00, 0.00]),
+            5: self.calculate_average([0.00, 0.00]),
+            6: self.calculate_average([0.00, 0.00]),
+        }
+        return self._find_closest_average(output_sum, averages)
+
+    def _print_visualisation(self, output_sum: float) -> None:
         """
         Выводит графическое представление результата и интерпретирует значение.
 
         :param output_sum: Сумма выходных данных.
         """
-        dice_faces = {
-            1: ["         ", "    ●    ", "         "],
-            2: ["      ●  ", "         ", "  ●      "],
-            3: ["      ●  ", "    ●    ", "  ●      "],
-            4: ["  ●   ●  ", "         ", "  ●   ●  "],
-            5: ["  ●   ●  ", "    ●    ", "  ●   ●  "],
-            6: ["  ●   ●  ", "  ●   ●  ", "  ●   ●  "],
-        }
-
-        margin = 0.0004  # Приемлемое отклонение
-
-        if abs(output_sum - 0.0329) < margin:
-            face = 1
-        elif abs(output_sum - 0.0309) < margin:
-            face = 2
-        elif abs(output_sum - 0.0514) < margin:
-            face = 3
-        elif abs(output_sum - 0.0591) < margin:
-            face = 4
-        elif abs(output_sum - 0.0648) < margin:
-            face = 5
-        elif abs(output_sum - 0.0304) < margin:
-            face = 6
+        data_class_name = self._calculate_classes_average(output_sum)
+        horizontal_line_first, horizontal_line_second = 54, 20
+        if data_class_name is not None:
+            print(f'\n┌{"─" * horizontal_line_first}┐')
+            print(f'│{" " * horizontal_line_second}{" " * 14}{" " * horizontal_line_second}│')
+            for number in get_json_data('numbers')[str(data_class_name)]:
+                print(f'│{" " * horizontal_line_second}{number}{" " * horizontal_line_second}│')
+            print(f'│{" " * horizontal_line_second}{" " * 14}{" " * horizontal_line_second}│')
+            print(f'└{"─" * horizontal_line_first}┘')
         else:
             print('Не могу интерпретировать значение результата!')
-            return
 
-        if face:
-            print(f'\n┌{"─" * 9}┐')
-            for line in dice_faces[face]:
-                print(f'|{line}|')
-            print(f'└{"─" * 9}┘')
-
-    def get_visualisation(self, input_dataset: list[float], layers: dict[str, any]) -> None:
+    def get_visualisation(self, input_dataset: list[float], layers: dict[str, any], output_layer: float) -> None:
         """
         Выводит визуальное представление нейронной сети.
 
         :param input_dataset: Входной набор данных.
         :param layers: Словарь слоев сети, где ключ - имя слоя, а значение - объект слоя.
+        :param output_layer: Выходные данные.
         """
         print(f'Класс: {self.__class__.__name__}')
         print(f'Всего слоёв: {len(layers)}')
@@ -90,7 +93,5 @@ class Visualisation(ActivationFunctions):
             result = layer.get_layer_dataset()
             print(f'Данные слоя: {[float(f"{i:.2f}") for i in result]}\n')
 
-            if name == 'hidden_layer_second':
-                output_sum = self.get_sigmoid(sum(result))
-                print(f'Выходные данные: {output_sum:.4f}')
-                self.__print_visualisation(output_sum)
+        print(f'Выходные данные: {output_layer:.2f}')
+        self._print_visualisation(float(f'{output_layer:.2f}'))

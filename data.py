@@ -4,10 +4,10 @@ import json
 class Data:
     """Класс Data предназначен для работы с набором данных."""
 
-    data_name: str = 'cube'
+    data_name: str = 'numbers'
     data_class_name = 1
     data_number: int = 1
-    file_path: str = 'encoded_images.json'
+    file_path: str = 'encoders/encoded_images.json'
     dataset: dict[str, any]
 
     try:

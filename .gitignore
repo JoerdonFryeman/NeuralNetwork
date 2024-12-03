@@ -20,7 +20,7 @@ coverage.xml
 *.iml
 *.iws
 # Logs
-/data.log
+temporary_files/data.log
 # Notes
-notes.py
-notes.txt
+temporary_files/notes.py
+temporary_files/notes.txt

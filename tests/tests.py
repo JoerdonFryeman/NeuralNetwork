@@ -2,9 +2,9 @@ import os
 import pickle
 import tempfile
 import unittest
-from unittest.mock import patch, mock_open
+from unittest.mock import patch, mock_open, MagicMock
 
-from configuration import get_json_data
+from config_files.configuration import get_json_data
 from data import Data
 from main import Control
 from layers import LayerBuilder, HiddenLayer
@@ -52,33 +52,33 @@ class TestConfigurationMethods(GeneralTestParameters):
     def test_get_json_data_success(self, mock_file):
         result = get_json_data('test_file')
         self.assertEqual(result, {'key': 'value'})
-        mock_file.assert_called_once_with('test_file.json', encoding='UTF-8')
+        mock_file.assert_called_once_with('config_files/test_file.json', encoding='UTF-8')
 
     @patch('builtins.open', side_effect=FileNotFoundError)
     def test_get_json_data_file_not_found(self, mock_file):
         with self.assertRaises(FileNotFoundError) as context:
             get_json_data("non_existing_file")
         self.assertEqual(str(context.exception), 'Файл не найден!')
-        mock_file.assert_called_once_with('non_existing_file.json', encoding='UTF-8')
+        mock_file.assert_called_once_with('config_files/non_existing_file.json', encoding='UTF-8')
 
 
 class TestDataMethods(GeneralTestParameters):
     """Класс для тестирования методов обработки данных."""
 
-    @patch.object(Data, 'dataset', {'cube': {'1': ['sample1', 'sample2', 'sample3']}})
+    @patch.object(Data, 'dataset', {'numbers': {'1': ['sample1', 'sample2', 'sample3']}})
     def test_get_data_dict(self):
         expected_data_dict = {1: 'sample1', 2: 'sample2', 3: 'sample3'}
         result = self.get_data_dict()
         self.assertEqual(result, expected_data_dict)
 
-    @patch.object(Data, 'dataset', {'cube': {'1': ['sample1', 'sample2', 'sample3']}})
+    @patch.object(Data, 'dataset', {'numbers': {'1': ['sample1', 'sample2', 'sample3']}})
     @patch.object(Data, 'data_number', 2)
     def test_get_data_sample(self):
         expected_sample = 'sample2'
         result = self.get_data_sample()
         self.assertEqual(result, expected_sample)
 
-    @patch.object(Data, 'dataset', {'cube': {'1': ['sample0', 'sample1', 'sample2', 'sample3']}})
+    @patch.object(Data, 'dataset', {'numbers': {'1': ['sample0', 'sample1', 'sample2', 'sample3']}})
     @patch.object(Data, 'data_number', 2)
     def test_get_normalized_target_value(self):
         expected_normalized_value = 0.3
@@ -170,7 +170,7 @@ class TestMachineLearningMethods(TestDataMethods):
         biases = {'layer1': [0.01, 0.02, 0.03], 'layer2': [0.04, 0.05, 0.06]}
         expected_data = {'weights': weights, 'biases': biases}
         self._save_weights_and_biases(weights, biases)
-        mock_open_instance.assert_called_once_with('weights_and_biases.pkl', 'wb')
+        mock_open_instance.assert_called_once_with('weights_and_biases/weights_and_biases.pkl', 'wb')
         file_handle = mock_open_instance()
         mock_dump.assert_called_once_with(expected_data, file_handle)
 
@@ -234,7 +234,7 @@ class TestMachineLearningMethods(TestDataMethods):
                     initial_weights[0][1] - self.control.learning_rate * (gradient + self._get_lasso_regularization(
                         self.control.regularization, initial_weights, 0, 1
                     ) + self._get_ridge_regularization(self.control.regularization, initial_weights, 0, 1)
-                    ) * self.input_dataset[1],
+                                                                          ) * self.input_dataset[1],
                 ],
                 [
                     initial_weights[1][0] - self.control.learning_rate * (
@@ -245,7 +245,7 @@ class TestMachineLearningMethods(TestDataMethods):
                     initial_weights[1][1] - self.control.learning_rate * (gradient + self._get_lasso_regularization(
                         self.control.regularization, initial_weights, 1, 1) + self._get_ridge_regularization(
                         self.control.regularization, initial_weights, 1, 1)
-                    ) * self.input_dataset[1],
+                                                                          ) * self.input_dataset[1],
                 ]
             ]
         expected_bias = initial_bias - self.control.learning_rate * gradient
@@ -253,24 +253,47 @@ class TestMachineLearningMethods(TestDataMethods):
         self.assertEqual(self.weights, expected_weights)
         self.assertEqual(self.bias, expected_bias)
 
-    def test_train(self):
-        """
-        На данный момент помечен как TODO.
-        Тестируем метод train на корректное обучение модели.
+    def test_train_method(self):
+        self.test_layer = MagicMock()
+        self.test_layer.input_dataset = self.input_dataset
+        self.test_layer.get_layer_dataset.return_value = list(map(sum, zip(*self.weights)))
 
-        Этот тест проверяет, что метод train класса MachineLearning корректно изменяет
-        веса и смещения слоя во время обучения.
-        """
-        pass
+        self.get_data_sample = MagicMock(return_value=self.input_dataset)
+        self.get_target_value_by_key = MagicMock(return_value=0.25)
+        self._update_weights = MagicMock()
+        self.get_train_visualisation = MagicMock()
+        self._calculate_error = MagicMock(return_value=0.05)
+        self._calculate_learning_decay = MagicMock(side_effect=lambda e, ep, lr, ld: lr * ld)
 
-    def test_train_layers_on_dataset(self):
-        """
-        На данный момент помечен как TODO.
+        data_key = 'test_key'
+        epochs = 10
+        learning_rate = 0.01
+        learning_decay = 0.9
+        error_tolerance = 0.05
+        regularization = 0.01
+        lasso_regularization = True
+        ridge_regularization = True
 
-        Этот метод будет использоваться для тестирования метода train_layers_on_dataset,
-        который еще не реализован.
-        """
-        pass
+        result = self._train(
+            data_key, self.test_layer, epochs, learning_rate, learning_decay, error_tolerance,
+            regularization, lasso_regularization, ridge_regularization
+        )
+
+        self.assertIsNotNone(result, "Метод _train не должен возвращать None")
+
+        self.assertIsInstance(result, tuple, "Метод должен возвращать кортеж")
+        self.assertEqual(len(result), 2, "Кортеж должен содержать два элемента: weights и bias")
+
+        weights, bias = result
+
+        self.assertIsNotNone(weights, "Веса должны быть определены")
+        self.assertIsNotNone(bias, "Смещение должно быть определено")
+
+        self.get_data_sample.assert_called()
+        self.get_target_value_by_key.assert_called_with(data_key)
+        self._update_weights.assert_called()
+        self.get_train_visualisation.assert_called()
+        self._calculate_learning_decay.assert_called()
 
 
 class TestLayerBuilderMethods(TestInitializationFunctions):

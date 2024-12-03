@@ -1,6 +1,6 @@
 import pickle
 
-from configuration import logger
+from config_files.configuration import logger
 from data import Data
 from visualisation import Visualisation
 
@@ -18,7 +18,7 @@ class MachineLearning(Visualisation, Data):
         """
         data: dict = {'weights': weights, 'biases': biases}
         try:
-            with open('weights_and_biases.pkl', 'wb') as file:
+            with open('weights_and_biases/weights_and_biases.pkl', 'wb') as file:
                 pickle.dump(data, file)
             logger.info('Данные успешно сохранены!')
         except Exception as e:
@@ -155,6 +155,7 @@ class MachineLearning(Visualisation, Data):
             learning_rate = self._calculate_learning_decay(epoch, epochs, learning_rate, learning_decay)
             if abs(prediction - target) < error_tolerance:
                 return layer.weights, layer.bias
+        return layer.weights, layer.bias
 
     def train_layers_on_dataset(
             self, hidden_layer_first, hidden_layer_second, epochs: int, learning_rate: float, learning_decay: float,

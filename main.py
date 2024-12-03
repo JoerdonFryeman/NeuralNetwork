@@ -1,5 +1,5 @@
 from data import Data
-from configuration import logger
+from config_files.configuration import logger
 from neural_network import NeuralNetwork
 
 

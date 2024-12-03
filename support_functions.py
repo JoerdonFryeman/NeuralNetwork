@@ -132,3 +132,15 @@ class InitializationFunctions:
         """
         limit: float = (2 / input_size) ** 0.5
         return -limit, limit
+
+
+class OtherFunctions:
+    @staticmethod
+    def calculate_average(value: list[int | float] | tuple[int | float]) -> int | float:
+        """
+        Вычисляет среднеарифметическое значение.
+
+        :param value: Список входящих значений.
+        :return: Среднеарифметическое значение.
+        """
+        return sum(value) / len(value)

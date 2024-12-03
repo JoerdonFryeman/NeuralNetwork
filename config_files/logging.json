@@ -17,7 +17,7 @@
             "class": "logging.FileHandler",
             "level": "DEBUG",
             "formatter": "simple",
-            "filename": "data.log",
+            "filename": "temporary_files/data.log",
             "mode": "w"
         }
     },
