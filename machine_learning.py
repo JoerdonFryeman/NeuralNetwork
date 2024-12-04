@@ -9,16 +9,19 @@ class MachineLearning(Visualisation, Data):
     """Класс отвечает за процесс обучения модели."""
 
     @staticmethod
-    def _save_weights_and_biases(weights: dict[str, list[list[float]]], biases: dict[str, list[float]]) -> None:
+    def _save_weights_and_biases(
+            filename: str, weights: dict[str, list[list[float]]], biases: dict[str, list[float]]
+    ) -> None:
         """
         Сохраняет веса и смещения в файл.
 
+        :param filename: Имя файла, в который будут загружены веса и смещения.
         :param weights: Словарь весов, где ключи - имена слоев, значения - веса слоев.
         :param biases: Словарь смещений, где ключи - имена слоев, значения - смещения слоев.
         """
         data: dict = {'weights': weights, 'biases': biases}
         try:
-            with open('weights_and_biases/weights_and_biases.pkl', 'wb') as file:
+            with open(filename, 'wb') as file:
                 pickle.dump(data, file)
             logger.info('Данные успешно сохранены!')
         except Exception as e:
@@ -197,4 +200,4 @@ class MachineLearning(Visualisation, Data):
         biases['hidden_layer_first'] = hidden_layer_first.bias
         biases['hidden_layer_second'] = hidden_layer_second.bias
 
-        self._save_weights_and_biases(weights, biases)
+        self._save_weights_and_biases('weights_and_biases/weights_and_biases.pkl', weights, biases)

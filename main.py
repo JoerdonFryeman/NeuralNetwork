@@ -61,10 +61,12 @@ def main() -> None:
             control.regularization, control.lasso_regularization, control.ridge_regularization, control.test_mode
         )
         logger.info("Построение нейронной сети завершено.")
-    except ValueError as error:
-        logger.error(f'Проверка выдала ошибку: {error}')
-    except Exception as e:
-        logger.error(f'Произошла непредвиденная ошибка: {e}')
+    except ValueError as v_error:
+        logger.error(f'Проверка выдала ошибку: {v_error}')
+    except ZeroDivisionError as z_error:
+        logger.error(f'Возможно неверное именование! Имя класса (каталога) данных не должно равняться нулю! {z_error}')
+    except Exception as e_error:
+        logger.error(f'Произошла непредвиденная ошибка: {e_error}')
 
 
 if __name__ == '__main__':

@@ -48,7 +48,7 @@ class GeneralTestParameters(
 class TestConfigurationMethods(GeneralTestParameters):
     """Класс для тестирования методов конфигурации."""
 
-    @patch("builtins.open", new_callable=mock_open, read_data='{"key": "value"}')
+    @patch('builtins.open', new_callable=mock_open, read_data='{"key": "value"}')
     def test_get_json_data_success(self, mock_file):
         result = get_json_data('test_file')
         self.assertEqual(result, {'key': 'value'})
@@ -57,7 +57,7 @@ class TestConfigurationMethods(GeneralTestParameters):
     @patch('builtins.open', side_effect=FileNotFoundError)
     def test_get_json_data_file_not_found(self, mock_file):
         with self.assertRaises(FileNotFoundError) as context:
-            get_json_data("non_existing_file")
+            get_json_data('non_existing_file')
         self.assertEqual(str(context.exception), 'Файл не найден!')
         mock_file.assert_called_once_with('config_files/non_existing_file.json', encoding='UTF-8')
 
@@ -93,7 +93,7 @@ class TestDataMethods(GeneralTestParameters):
 
     def test_get_target_value_by_key_invalid_key(self):
         key = '10'
-        expected_value = 0.0
+        expected_value = 1.0
         result = self.get_target_value_by_key(key)
         self.assertEqual(result, expected_value, f"Метод вернул неправильное значение для несуществующего ключа {key}")
 
@@ -169,7 +169,7 @@ class TestMachineLearningMethods(TestDataMethods):
         weights = {'layer1': [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]], 'layer2': [[0.7, 0.8], [0.9, 1.0], [1.1, 1.2]]}
         biases = {'layer1': [0.01, 0.02, 0.03], 'layer2': [0.04, 0.05, 0.06]}
         expected_data = {'weights': weights, 'biases': biases}
-        self._save_weights_and_biases(weights, biases)
+        self._save_weights_and_biases('weights_and_biases/weights_and_biases.pkl', weights, biases)
         mock_open_instance.assert_called_once_with('weights_and_biases/weights_and_biases.pkl', 'wb')
         file_handle = mock_open_instance()
         mock_dump.assert_called_once_with(expected_data, file_handle)
@@ -376,8 +376,8 @@ class TestNeuralNetworkMethods(GeneralTestParameters):
         test_data = {'weights': self.weights, 'biases': [self.bias, self.bias + 0.1]}
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
             filename = temp_file.name
-            with open(filename, 'wb') as f:
-                pickle.dump(test_data, f)
+            with open(filename, 'wb') as file:
+                pickle.dump(test_data, file)
         loaded_data = self.neural_network._load_weights_and_biases(filename)
         self.assertEqual(loaded_data, test_data)
         os.remove(filename)

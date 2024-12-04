@@ -55,13 +55,13 @@ def encode_images_from_directory(dir_path: str, output_file: str, invert_colors:
         numbers_data[sub_dir_name] = images_data
     # Приведение структуры к формату с ключом "numbers"
     data = {"numbers": numbers_data}
-    with open(output_file, 'w') as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
+    with open(output_file, 'w') as file:
+        json.dump(data, file, ensure_ascii=False, indent=4)
 
 
 if __name__ == '__main__':
     directory_path = 'numbers/'  # Путь к главной директории с поддиректориями
-    output_file = '/home/kepler/Programming/Python/Projects/NeuralNetwork/image_encoder/encoded_images.json'
+    output_file = 'encoded_images.json'
     # Настройки
     invert_colors = False
     image_size = (28, 28)

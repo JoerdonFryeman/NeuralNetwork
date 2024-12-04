@@ -98,7 +98,7 @@ class NeuralNetwork(MachineLearning, ActivationFunctions, LayerBuilder):
             data: dict = self._load_weights_and_biases('weights_and_biases/weights_and_biases.pkl')
             logger.info(f'Веса и смещения для слоя "{layer_name}" успешно загружены и установлены.')
         except FileNotFoundError:
-            logger.error('Файл weights_and_biases.pkl не найден.')
+            logger.error('Файл weights_and_biases.pkl не найден!')
             data = {'weights': {}, 'biases': {}}
         weights = data['weights'].get(layer_name)
         bias = data['biases'].get(layer_name)

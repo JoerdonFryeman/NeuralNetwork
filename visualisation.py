@@ -18,8 +18,8 @@ class Visualisation(ActivationFunctions, OtherFunctions):
         """
         if epoch % 50 == 0:
             print(
-                f'Epoch: {epoch}, error: {calculate_error(prediction, target):.1f}%, '
-                f'prediction: {prediction * 10:.4f}, result: {sum(layer.get_layer_dataset()):.4f}'
+                f'Эпоха: {epoch}, ошибка: {calculate_error(prediction, target):.1f}%, '
+                f'прогноз: {prediction * 10:.4f}, результат: {sum(layer.get_layer_dataset()):.4f}'
             )
 
     @staticmethod
@@ -31,7 +31,7 @@ class Visualisation(ActivationFunctions, OtherFunctions):
         :param output_layer: Выходной слой.
         """
         print(
-            f'\nОбучение грани куба {data_number} завершено, результат: '
+            f'\nОбучение класса данных {data_number} завершено, результат: '
             f'{sum(output_layer.get_layer_dataset()) * 10:.0f}\n'
         )
 
