@@ -1,3 +1,4 @@
+import os
 import pickle
 
 from config_files.configuration import logger
@@ -200,4 +201,9 @@ class MachineLearning(Visualisation, Data):
         biases['hidden_layer_first'] = hidden_layer_first.bias
         biases['hidden_layer_second'] = hidden_layer_second.bias
 
+        try:
+            os.mkdir('weights_and_biases')
+            logger.info('Создан каталог для весов и смещений "weights_and_biases".')
+        except FileExistsError:
+            pass
         self._save_weights_and_biases('weights_and_biases/weights_and_biases.pkl', weights, biases)
