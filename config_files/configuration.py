@@ -1,3 +1,4 @@
+import os
 from json import load
 from logging import config, getLogger
 
@@ -17,5 +18,14 @@ def get_json_data(name: str) -> dict:
         raise FileNotFoundError('Файл не найден!')
 
 
+def make_directory(directory: str) -> None:
+    try:
+        os.mkdir(directory)
+        print(f'Создан каталог "{directory}".\n')
+    except FileExistsError:
+        print(f'Найден каталог "{directory}".\n')
+
+
+make_directory('temporary_files')
 config.dictConfig(get_json_data('logging'))
 logger = getLogger()

@@ -1,5 +1,7 @@
 import json
 
+from config_files.configuration import make_directory
+
 
 class Data:
     """Класс Data предназначен для работы с набором данных."""
@@ -7,6 +9,7 @@ class Data:
     data_name: str = 'numbers'
     data_class_name = 1
     data_number: int = 1
+    make_directory('encoders')
     file_path: str = 'encoders/encoded_images.json'
     dataset: dict[str, any]
 
