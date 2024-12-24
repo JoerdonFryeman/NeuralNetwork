@@ -34,13 +34,13 @@
 cd encoders && python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt && cd ../ && python main.py
 ```
 
-Если использetnt свой скрипт кодирования:
-```console
-python main.py
-```
 ## Запуск
 
 Для запуска основного процесса выполните:
+```console
+cd encoders && source venv/bin/activate && cd ../ && python main.py
+```
+Если используете свой скрипт кодирования:
 ```console
 python main.py
 ```
@@ -48,7 +48,7 @@ python main.py
 
 ### Параметры обучения
 
-- `init_func`: (default: `xavier`) Выбор метода инициализации весов: `uniform`, `xavier`, `he`
+- `init_func` (default: `xavier`): Выбор метода инициализации весов: `uniform`, `xavier`, `he`
 - `epochs` (default: 1000): Количество эпох для обучения.
 - `learning_rate` (default: 0.001): Скорость обучения.
 - `error_tolerance` (default: 0.001): Допустимый уровень ошибки.
@@ -105,6 +105,8 @@ python -m unittest discover
 ## Лицензия
 
 Этот проект разрабатывается под лицензией MIT.
+
+---
 
 ## Поддержать с помощью Биткоина:
 
