@@ -1,6 +1,6 @@
 from pickle import load
 
-from config_files.configuration import logger
+from configuration import logger
 from layers import LayerBuilder, HiddenLayer
 from machine_learning import MachineLearning
 from support_functions import ActivationFunctions
@@ -80,10 +80,10 @@ class NeuralNetwork(MachineLearning, ActivationFunctions, LayerBuilder):
         logger.info(f'Добавление слоя "{name}" в сеть.')
         self.layers[name] = layer
 
-    def _create_layer(self, layer_class, layer_name: str, input_dataset, *args):
+    def _create_layer(self, layer_class, layer_name: str, input_dataset: list[float], *args):
         """
         Вспомогательный метод для создания и добавления слоя.
-        Метод пытается загрузить веса и смещения из файла 'weights_and_biases.pkl'.
+        Метод пытается загрузить веса и смещения из файла 'weights_biases_and_data.pkl'.
         Если файл не найден, используются пустые значения. Затем создается слой,
         и добавляется в нейронную сеть с использованием метода add_layer().
 
@@ -95,10 +95,10 @@ class NeuralNetwork(MachineLearning, ActivationFunctions, LayerBuilder):
         """
         try:
             # Пытается загрузить веса и смещения из файла.
-            data: dict = self._load_weights_and_biases('weights_and_biases/weights_and_biases.pkl')
+            data: dict = self._load_weights_and_biases('weights_biases_and_data/weights_and_biases.pkl')
             logger.info(f'Веса и смещения для слоя "{layer_name}" успешно загружены и установлены.')
         except FileNotFoundError:
-            logger.error('Файл weights_and_biases.pkl не найден!')
+            logger.error('Файл weights_biases_and_data.pkl не найден!')
             data = {'weights': {}, 'biases': {}}
         weights = data['weights'].get(layer_name)
         bias = data['biases'].get(layer_name)
@@ -113,7 +113,7 @@ class NeuralNetwork(MachineLearning, ActivationFunctions, LayerBuilder):
     def build_neural_network(
             self, epochs: int, learning_rate: float, learning_decay: float, error_tolerance: float,
             regularization: float, lasso_regularization: bool, ridge_regularization: bool, test_mode: bool
-    ) -> None:
+    ) -> float:
         """
         Строит нейронную сеть, добавляя внешние и скрытые слои.
 
@@ -130,7 +130,7 @@ class NeuralNetwork(MachineLearning, ActivationFunctions, LayerBuilder):
         :param lasso_regularization: Использовать Lasso регуляризацию.
         :param ridge_regularization: Использовать Ridge регуляризацию.
         :param test_mode: Режим тестирования. По умолчанию: False.
-        :return: None
+        :return output_layer: Выходные данные.
         """
         hidden_layer_first = self._create_layer(
             HiddenLayer, 'hidden_layer_first',
@@ -148,4 +148,4 @@ class NeuralNetwork(MachineLearning, ActivationFunctions, LayerBuilder):
                 error_tolerance, regularization, lasso_regularization, ridge_regularization
             )
             logger.info('Обучение нейронной сети завершено.')
-        self.get_visualisation(self.input_dataset, self.layers, output_layer)
+        return float(f'{output_layer:.10f}')

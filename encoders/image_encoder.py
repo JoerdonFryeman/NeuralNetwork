@@ -47,7 +47,6 @@ def encode_images_from_directory(dir_path: str, output_file: str, invert_colors:
                 try:
                     layer = encode_image_to_array(file_path, invert_colors, size)
                     images_data.append(layer)
-                    print(f"Processed file {idx + 1}: {file_name} => Sample size: {len(layer)}")
                 except Exception as e:
                     print(f"Failed to process {file_name}: {e}")
             else:
@@ -57,12 +56,3 @@ def encode_images_from_directory(dir_path: str, output_file: str, invert_colors:
     data = {"numbers": numbers_data}
     with open(output_file, 'w') as file:
         json.dump(data, file, ensure_ascii=False, indent=4)
-
-
-if __name__ == '__main__':
-    directory_path = 'numbers/'  # Путь к главной директории с поддиректориями
-    output_file = 'encoded_images.json'
-    # Настройки
-    invert_colors = False
-    image_size = (28, 28)
-    encode_images_from_directory(directory_path, output_file, invert_colors, image_size)

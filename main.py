@@ -1,5 +1,5 @@
+from configuration import logger, select_os_command
 from data import Data
-from config_files.configuration import logger
 from neural_network import NeuralNetwork
 
 
@@ -20,6 +20,7 @@ class Control:
         :param lasso_regularization (bool): Флаг использования L1 регуляризации. По умолчанию False.
         :param ridge_regularization (bool): Флаг использования L2 регуляризации. По умолчанию True.
         :param test_mode (bool): Флаг тестового режима. По умолчанию False.
+        :param visual (bool): Флаг режима визуализации. По умолчанию True.
         """
         self.training: bool = False
         self.init_func: str = 'xavier'
@@ -31,36 +32,66 @@ class Control:
         self.lasso_regularization: bool = False
         self.ridge_regularization: bool = True
         self.test_mode: bool = False
+        self.visual: bool = True
 
 
-def init_objects(control: Control) -> tuple[Data, NeuralNetwork]:
+control = Control()
+data = Data()
+
+
+def init_network() -> None | float:
     """
-    Инициализирует и возвращает объекты данных и нейронной сети на основе заданного контроля параметров.
+    Инициализирует параметры управления и создает объекты нейронной сети.
 
-    :param control: Объект Control, содержащий параметры обучения и конфигурации для нейронной сети.
-    :return: Кортеж, содержащий объекты Data и NeuralNetwork, готовые для использования.
+    :return: Возвращает результат вычислений выходного слоя, если сеть не находится в режиме обучения.
     """
-    data = Data()
-    network = NeuralNetwork(control.training, control.init_func, data.get_data_sample())
-    return data, network
+    network = NeuralNetwork(
+        control.training, control.init_func, data.get_data_sample(data.data_class_name, data.data_number)
+    )
+    output_layer = network.build_neural_network(
+        control.epochs, control.learning_rate, control.learning_decay, control.error_tolerance, control.regularization,
+        control.lasso_regularization, control.ridge_regularization, control.test_mode
+    )
+    if not control.training:
+        if control.visual:
+            network.get_info_visualisation(network.input_dataset, network.layers, output_layer)
+        return output_layer
+
+
+def change_training_mode(training_mode: str):
+    commands_yes: tuple[str, str, str, str] = ('да', 'д', 'yes', 'y')
+    commands_no: tuple[str, str, str, str] = ('нет', 'н', 'no', 'n')
+    if training_mode.lower() in commands_yes:
+        control.training = True
+        select_os_command('clear_screen')
+        print('Выполняю обучение нейронной сети!\n')
+    elif training_mode.lower() in commands_no:
+        select_os_command('clear_screen')
+        print('Выполняю построение нейронной сети!\n')
+        control.training = False
+    else:
+        select_os_command('clear_screen')
+        if training_mode.lower() != '':
+            message = f'Команда "{training_mode.lower()}" не распознана!'
+        else:
+            message = 'Вы ничего не ответили!'
+        print(f'{message} Выполняю построение нейронной сети.\n')
+        control.training = False
 
 
 def main() -> None:
-    """
-    Главная функция программы, запускающая процесс создания и обучения нейронной сети.
-
-    Инициализирует параметры управления, создает объекты данных и нейронной сети,
-    а затем начинает процесс обучения сети, обрабатывая любые возникшие ошибки в процессе.
-    """
-    control = Control()
-    data, network = init_objects(control)
+    """Запускающая все процессы главная функция."""
+    select_os_command('clear_screen')
+    change_training_mode(input('Активировать режим обучения?\n'))
     try:
-        logger.info("Начало построения нейронной сети.")
-        network.build_neural_network(
-            control.epochs, control.learning_rate, control.learning_decay, control.error_tolerance,
-            control.regularization, control.lasso_regularization, control.ridge_regularization, control.test_mode
-        )
-        logger.info("Построение нейронной сети завершено.")
+        if control.training:
+            init_network()
+            control.visual, control.training = False, False
+            data.load_output_layer_data(init_network, True)
+            print('Обучение нейронной сети завершено!\n')
+        elif not control.training:
+            data.load_output_layer_data(init_network, False)
+            print('\nПостроение нейронной сети завершено!\n')
     except ValueError as v_error:
         logger.error(f'Проверка выдала ошибку: {v_error}')
     except ZeroDivisionError as z_error:

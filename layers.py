@@ -1,6 +1,6 @@
 from random import uniform, seed
 
-from config_files.configuration import logger
+from configuration import logger
 from support_functions import InitializationFunctions
 
 

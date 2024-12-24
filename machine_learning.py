@@ -1,6 +1,7 @@
+import os
 import pickle
 
-from config_files.configuration import logger, make_directory
+from configuration import logger
 from data import Data
 from visualisation import Visualisation
 
@@ -10,18 +11,23 @@ class MachineLearning(Visualisation, Data):
 
     @staticmethod
     def _save_weights_and_biases(
-            filename: str, weights: dict[str, list[list[float]]], biases: dict[str, list[float]]
+            directory: str, name: str, weights: dict[str, list[list[float]]], biases: dict[str, list[float]]
     ) -> None:
         """
         Сохраняет веса и смещения в файл.
 
-        :param filename: Имя файла, в который будут загружены веса и смещения.
+        :param directory: Название каталога.
+        :param name: Имя файла, в который будут загружены веса и смещения.
         :param weights: Словарь весов, где ключи - имена слоев, значения - веса слоев.
         :param biases: Словарь смещений, где ключи - имена слоев, значения - смещения слоев.
         """
         data: dict = {'weights': weights, 'biases': biases}
         try:
-            with open(filename, 'wb') as file:
+            try:
+                os.mkdir(directory)
+            except FileExistsError:
+                pass
+            with open(f'{directory}/{name}.pkl', 'wb') as file:
                 pickle.dump(data, file)
             logger.info('Данные успешно сохранены!')
         except Exception as e:
@@ -147,7 +153,7 @@ class MachineLearning(Visualisation, Data):
         :return: Кортеж с обновленными весами и смещением (bias) слоя.
         """
         for epoch in range(epochs):
-            layer.input_dataset = self.get_data_sample()
+            layer.input_dataset = self.get_data_sample(self.data_class_name, self.data_number)
             prediction: float = sum(layer.get_layer_dataset())
             target: float = self.get_target_value_by_key(data_key)
             gradient: float = prediction - target
@@ -182,7 +188,7 @@ class MachineLearning(Visualisation, Data):
 
         for data_key, data_samples in self.dataset[self.data_name].items():
             for _ in data_samples:
-                hidden_layer_first.input_dataset = self.get_data_sample()
+                hidden_layer_first.input_dataset = self.get_data_sample(self.data_class_name, self.data_number)
                 self._train(
                     data_key, hidden_layer_first, epochs, learning_rate, learning_decay,
                     error_tolerance, regularization, lasso_regularization, ridge_regularization
@@ -200,5 +206,4 @@ class MachineLearning(Visualisation, Data):
         biases['hidden_layer_first'] = hidden_layer_first.bias
         biases['hidden_layer_second'] = hidden_layer_second.bias
 
-        make_directory('weights_and_biases')
-        self._save_weights_and_biases('weights_and_biases/weights_and_biases.pkl', weights, biases)
+        self._save_weights_and_biases('weights_biases_and_data', 'weights_and_biases', weights, biases)

@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from unittest.mock import patch, mock_open, MagicMock
 
-from config_files.configuration import get_json_data
+from configuration import get_json_data
 from data import Data
 from main import Control
 from layers import LayerBuilder, HiddenLayer
@@ -169,8 +169,8 @@ class TestMachineLearningMethods(TestDataMethods):
         weights = {'layer1': [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]], 'layer2': [[0.7, 0.8], [0.9, 1.0], [1.1, 1.2]]}
         biases = {'layer1': [0.01, 0.02, 0.03], 'layer2': [0.04, 0.05, 0.06]}
         expected_data = {'weights': weights, 'biases': biases}
-        self._save_weights_and_biases('weights_and_biases/weights_and_biases.pkl', weights, biases)
-        mock_open_instance.assert_called_once_with('weights_and_biases/weights_and_biases.pkl', 'wb')
+        self._save_weights_and_biases('weights_biases_and_data/weights_biases_and_data.pkl', weights, biases)
+        mock_open_instance.assert_called_once_with('weights_biases_and_data/weights_biases_and_data.pkl', 'wb')
         file_handle = mock_open_instance()
         mock_dump.assert_called_once_with(expected_data, file_handle)
 
