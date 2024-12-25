@@ -13,8 +13,8 @@ image_size: tuple[int, int] = (28, 28)
 
 try:
     directories: tuple[str, str, str, str, str, str, str] = (
-        'learning_data', 'learning_data/numbers/', 'weights_biases_and_data',
-        'temporary_files', 'config_files', 'encoders', 'tests'
+        'weights_biases_and_data', 'temporary_files', 'learning_data', 
+        'learning_data/numbers/', 'config_files', 'encoders', 'tests'
     )
     # Создаёт необходимый каталог в случае его отсутствия.
     for i in range(len(directories)):
