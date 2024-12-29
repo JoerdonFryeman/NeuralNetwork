@@ -7,7 +7,7 @@ from visualisation import Visualisation
 
 
 class MachineLearning(Visualisation, Data):
-    """Класс отвечает за процесс обучения модели."""
+    """Класс отвечает за процесс обучения нейронной сети."""
 
     @staticmethod
     def _save_weights_and_biases(
@@ -40,6 +40,7 @@ class MachineLearning(Visualisation, Data):
 
         :param predicted: Предсказанное значение.
         :param target: Целевое значение.
+
         :return: Ошибка в процентном соотношении.
         """
         return ((predicted - target) / target) * 100
@@ -54,6 +55,7 @@ class MachineLearning(Visualisation, Data):
         :param weights: Список весов.
         :param i: Индекс первой координаты веса.
         :param j: Индекс второй координаты веса.
+
         :return: Значение Lasso регуляризации.
         """
         return regularization * (1 if weights[i][j] > 0 else -1)
@@ -68,6 +70,7 @@ class MachineLearning(Visualisation, Data):
         :param weights: Список весов.
         :param i: Индекс первой координаты веса.
         :param j: Индекс второй координаты веса.
+
         :return: Значение Ridge регуляризации.
         """
         return regularization * weights[i][j]
@@ -98,6 +101,7 @@ class MachineLearning(Visualisation, Data):
         :param epochs: Общее количество эпох.
         :param learning_rate: Текущая скорость обучения.
         :param learning_decay: Коэффициент уменьшения скорости обучения.
+
         :return: Обновленная скорость обучения.
         """
         if epoch % (epochs // 4) == 0 and epoch != 0:
@@ -150,6 +154,7 @@ class MachineLearning(Visualisation, Data):
         :param regularization: Параметр регуляризации.
         :param lasso_regularization: Использовать Lasso регуляризацию.
         :param ridge_regularization: Использовать Ridge регуляризацию.
+
         :return: Кортеж с обновленными весами и смещением (bias) слоя.
         """
         for epoch in range(epochs):
