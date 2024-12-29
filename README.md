@@ -26,18 +26,18 @@
 ## Установка
 Для запуска процесса установки выполните следующую команду:
 ```console
-cd encoders && python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt && cd ../ && python main.py
+cd encoders && python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt && cd ../ && python3 main.py
 ```
 
 ## Запуск
 
 Для запуска основного процесса выполните:
 ```console
-cd encoders && source venv/bin/activate && cd ../ && python main.py
+cd encoders && source venv/bin/activate && cd ../ && python3 main.py
 ```
-Если используете свой скрипт кодирования:
+Если используете свой скрипт кодирования выполните:
 ```console
-python main.py
+python3 main.py
 ```
 
 ## Настройка
@@ -51,11 +51,6 @@ python main.py
 - `regularization` (default: 0.001): Параметр регуляризации.
 - `lasso_regularization` (default: False): Использовать Lasso регуляризацию.
 - `ridge_regularization` (default: True): Использовать Ridge регуляризацию.
-
-Для запуска всех тестов выполните:
-```bash
-python -m unittest discover
-```
 
 ## Лицензия
 
