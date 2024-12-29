@@ -3,17 +3,15 @@ import json
 from platform import system
 from logging import config, getLogger
 
-
 use_image_encoder: bool = True
 directory_path: str = 'learning_data/numbers/'
 output_file: str = 'weights_biases_and_data/encoded_data.json'
 invert_colors: bool = False
 image_size: tuple[int, int] = (28, 28)
 
-
 try:
     directories: tuple[str, str, str, str, str, str, str] = (
-        'weights_biases_and_data', 'temporary_files', 'learning_data', 
+        'weights_biases_and_data', 'temporary_files', 'learning_data',
         'learning_data/numbers/', 'config_files', 'encoders', 'tests'
     )
     # Создаёт необходимый каталог в случае его отсутствия.
@@ -22,7 +20,6 @@ try:
         i += 1
 except FileExistsError:
     pass
-
 
 if use_image_encoder:
     # Запускает встроенный скрипт для преобразования изображений в числовые массивы.
@@ -37,6 +34,7 @@ def get_json_data(directory: str, name: str) -> dict:
 
     :param directory: Название каталога.
     :param name: Имя файла без расширения.
+
     :return: Словарь с данными из json файла.
     :raises FileNotFoundError: Если файл не найден.
     """
@@ -50,7 +48,14 @@ def get_json_data(directory: str, name: str) -> dict:
         raise ValueError(f'Ошибка декодирования JSON в файле: {name}')
 
 
-def save_json_data(directory: str, name: str, data):
+def save_json_data(directory: str, name: str, data: dict[str, list[float]]) -> None:
+    """
+    Сохраняет файл json.
+
+    :param directory: Директория сохраняемого файла.
+    :param name: Имя сохраняемого файла.
+    :param data: Данные сохраняемого файла.
+    """
     with open(f'{directory}/{name}.json', 'w') as json_file:
         json.dump(data, json_file, indent=4)
 
@@ -58,6 +63,7 @@ def save_json_data(directory: str, name: str, data):
 def select_os_command(command: str):
     """
     Возвращает необходимую команду в зависимости от операционной системы.
+
     :param command: Необходимая команда в строковом виде.
     :return: Возвращает системную команду.
     """
