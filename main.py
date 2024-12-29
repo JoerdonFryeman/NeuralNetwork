@@ -42,7 +42,6 @@ data = Data()
 def init_network() -> None | float:
     """
     Инициализирует параметры управления и создает объекты нейронной сети.
-
     :return: Возвращает результат вычислений выходного слоя, если сеть не находится в режиме обучения.
     """
     network = NeuralNetwork(
@@ -58,7 +57,11 @@ def init_network() -> None | float:
         return output_layer
 
 
-def change_training_mode(training_mode: str):
+def change_training_mode(training_mode: str) -> None:
+    """
+    Управляет консольными командами.
+    :param training_mode: Команда начала обучения нейросети.
+    """
     commands_yes: tuple[str, str, str, str] = ('да', 'д', 'yes', 'y')
     commands_no: tuple[str, str, str, str] = ('нет', 'н', 'no', 'n')
     if training_mode.lower() in commands_yes:
@@ -74,7 +77,7 @@ def change_training_mode(training_mode: str):
         if training_mode.lower() != '':
             message = f'Команда "{training_mode.lower()}" не распознана!'
         else:
-            message = 'Вы ничего не ответили!'
+            message = 'Вы ничего не ответили!\n'
         print(f'{message} Выполняю построение нейронной сети.\n')
         control.training = False
 
