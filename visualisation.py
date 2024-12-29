@@ -4,7 +4,7 @@ from support_functions import ActivationFunctions
 
 
 class Visualisation(ActivationFunctions, Data):
-    """Класс предоставляет функции для визуализации процесса обучения и результатов работы нейронной сети."""
+    """Класс содержит методы визуализации процесса обучения и результатов работы нейронной сети."""
 
     @staticmethod
     def get_train_visualisation(epoch, calculate_error, prediction, target, layer):
@@ -38,7 +38,7 @@ class Visualisation(ActivationFunctions, Data):
 
     def _get_number_visualisation(self, output_layer: float) -> None:
         """
-        Выводит графическое представление результата и интерпретирует значение.
+        Выводит графическое представление результата.
 
         :param output_layer: Выходные данные.
         """
@@ -56,9 +56,11 @@ class Visualisation(ActivationFunctions, Data):
         else:
             print('Не могу интерпретировать значение результата!')
 
-    def get_info_visualisation(self, input_dataset: list[float], layers: dict[str, any], output_layer: float) -> None:
+    def get_info_visualisation(
+            self, input_dataset: list[int | float], layers: dict[str, any], output_layer: float
+    ) -> None:
         """
-        Выводит визуальное представление нейронной сети.
+        Выводит визуальное представление нейронной сети и результат.
 
         :param input_dataset: Входной набор данных.
         :param layers: Словарь слоев сети, где ключ - имя слоя, а значение - объект слоя.
