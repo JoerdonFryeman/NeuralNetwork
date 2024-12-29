@@ -162,10 +162,9 @@ class HiddenLayer(LayerBuilder):
     def get_layer_dataset(self) -> list[float]:
         """
         Вычисляет и возвращает выходы слоя с учетом весов, смещений и функции активации.
-
         :return: Список значений, представляющих выходы каждого нейрона после применения функции активации.
         """
-        # Вызывается метод calculate_neuron_dataset для расчета выходных данных каждого нейрона.
+        # Метод calculate_neuron_dataset вызывается для расчета выходных данных каждого нейрона.
         result: list[float] = self.calculate_neuron_dataset(
             self.input_dataset, self.neuron_number, self.weights, self.bias,
             self.activate_func, self.switch, self.test_mode
