@@ -7,7 +7,7 @@ class Visualisation(ActivationFunctions, Data):
     """Класс содержит методы визуализации процесса обучения и результатов работы нейронной сети."""
 
     @staticmethod
-    def get_train_visualisation(epoch, calculate_error, prediction, target, layer):
+    def get_train_visualisation(epoch, calculate_error, prediction, target, layer) -> None:
         """
         Выводит визуализацию процесса обучения.
 
@@ -24,7 +24,7 @@ class Visualisation(ActivationFunctions, Data):
             )
 
     @staticmethod
-    def get_train_layers_on_dataset_visualisation(data_class_name: int, output_layer):
+    def get_train_layers_on_dataset_visualisation(data_class_name: int, output_layer) -> None:
         """
         Выводит визуальное представление результатов обучения для текущего набора данных.
 
