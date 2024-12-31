@@ -75,10 +75,10 @@ def change_training_mode(training_mode: str) -> None:
     else:
         select_os_command('clear_screen')
         if training_mode.lower() != '':
-            message = f'Команда "{training_mode.lower()}" не распознана!'
+            message = f'Команда "{training_mode.lower()}" не распознана!\n'
         else:
             message = 'Вы ничего не ответили!\n'
-        print(f'{message} Выполняю построение нейронной сети.\n')
+        print(f'{message}Выполняю построение нейронной сети.\n')
         control.training = False
 
 
