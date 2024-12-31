@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+
 # Unit test / coverage reports
 htmlcov/
 .tox/
@@ -13,16 +14,21 @@ nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
+
 # pyenv
 .python-version
+
 # venv
 encoders/venv
+
 # PyCharm
 .idea/
 *.iml
 *.iws
+
 # Logs
 temporary_files/data.log
+
 # Notes
 temporary_files/notes.py
 temporary_files/notes.txt
