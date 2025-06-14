@@ -9,6 +9,8 @@ from support_functions import ActivationFunctions
 class NeuralNetwork(MachineLearning, ActivationFunctions, LayerBuilder):
     """Класс построения многослойной нейронной сети."""
 
+    __slots__ = ('training', 'init_func', 'input_dataset', 'layers')
+
     def __init__(self, training, init_func, input_dataset: list[float]):
         """
         Инициализирует экземпляр класса с заданными параметрами обучения, методом инициализации.
@@ -19,7 +21,7 @@ class NeuralNetwork(MachineLearning, ActivationFunctions, LayerBuilder):
         :param layers (dict): Задействованные в текущей модели слои.
         """
         super().__init__()
-        self.initialization = init_func
+        self.init_func = init_func
         self.training: bool = training
         self.input_dataset: list[int | float] = self._validate_input_dataset(input_dataset)
         self.layers: dict[str, object] = {}
@@ -33,7 +35,7 @@ class NeuralNetwork(MachineLearning, ActivationFunctions, LayerBuilder):
         :return: Словарь с весами и смещениями.
         """
         with open(filename, 'rb') as file:
-            data: dict[str, dict[str, any]] = load(file)
+            data: dict[str, dict] = load(file)
         return data
 
     @staticmethod
@@ -106,7 +108,7 @@ class NeuralNetwork(MachineLearning, ActivationFunctions, LayerBuilder):
         weights = data['weights'].get(layer_name)
         bias = data['biases'].get(layer_name)
         # Создаётся объект слоя, инициализируя его текущими весами и смещениями.
-        layer = layer_class(self.training, self.initialization, input_dataset, weights, bias, *args)
+        layer = layer_class(self.training, self.init_func, input_dataset, weights, bias, *args)
         # Созданный слой добавляется в нейронную сеть.
         self._add_layer(layer_name, layer)
         logger.debug(f'Слой "{layer_name}" создан с параметрами: {layer}')

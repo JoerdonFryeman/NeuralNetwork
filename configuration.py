@@ -4,8 +4,7 @@ from platform import system
 from logging import config, getLogger
 
 use_image_encoder: bool = True
-directory_path: str = 'learning_data/numbers/'
-output_file: str = 'weights_biases_and_data/encoded_data.json'
+directory_path: str = 'numbers'
 invert_colors: bool = False
 image_size: tuple[int, int] = (28, 28)
 
@@ -25,7 +24,9 @@ if use_image_encoder:
     # Запускает встроенный скрипт для преобразования изображений в числовые массивы.
     from encoders.image_encoder import encode_images_from_directory
 
-    encode_images_from_directory(directory_path, output_file, invert_colors, image_size)
+    encode_images_from_directory(
+        f'learning_data/{directory_path}', 'weights_biases_and_data/input_dataset.json', invert_colors, image_size
+    )
 
 
 def get_json_data(directory: str, name: str) -> dict:
@@ -69,6 +70,7 @@ def select_os_command(command: str):
     """
     if command == 'clear_screen':
         return os.system({'Linux': lambda: 'clear', 'Windows': lambda: 'cls'}[system()]())
+    return None
 
 
 config.dictConfig(get_json_data('config_files', 'logging'))

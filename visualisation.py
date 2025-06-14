@@ -57,7 +57,7 @@ class Visualisation(ActivationFunctions, Data):
             print('Не могу интерпретировать значение результата!')
 
     def get_info_visualisation(
-            self, input_dataset: list[int | float], layers: dict[str, any], output_layer: float
+            self, input_dataset: list[int | float], layers: dict, output_layer: float
     ) -> None:
         """
         Выводит визуальное представление нейронной сети и результат.
@@ -67,8 +67,8 @@ class Visualisation(ActivationFunctions, Data):
         :param output_layer: Выходные данные.
         """
         print(f'Всего слоёв: {len(layers) + 1}')
-        print(f'Количество классов данных: {self.get_data_dict_value('data_class_name')}')
-        print(f'Количество данных в каждом классе: {self.get_data_dict_value('data_number')}\n')
+        print(f'Количество классов данных: {self.get_data_dict_value('serial_class_number')}')
+        print(f'Количество данных в каждом классе: {self.get_data_dict_value('serial_data_number')}\n')
 
         print(f'Количество входных данных: {len(input_dataset)}\n')
 

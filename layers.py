@@ -104,7 +104,7 @@ class LayerBuilder(InitializationFunctions):
     @staticmethod
     def calculate_neuron_dataset(
             input_dataset: list[int | float], neuron_number: int, weights: list[list[int | float]],
-            bias: float, activate_func: callable, switch: bool, test_mode: bool
+            bias: float, act_func: callable, switch: bool, test_mode: bool
     ) -> list[float]:
         """
         Вычисляет выходные данные для заданного количества нейронов на основе входных данных и весов.
@@ -113,7 +113,7 @@ class LayerBuilder(InitializationFunctions):
         :param neuron_number: Количество нейронов, для которых необходимо произвести вычисления.
         :param weights: Двумерный список весов для каждого нейрона.
         :param bias: Смещение, которое будет добавлено или вычтено из взвешенной суммы, в зависимости от параметра switch.
-        :param activate_func: Функция активации, применяемая к взвешенной сумме для каждого нейрона.
+        :param act_func: Функция активации, применяемая к взвешенной сумме для каждого нейрона.
         :param switch: Логический флаг, определяющий, будет ли смещение добавлено (если True) или вычтено (если False) из взвешенной суммы.
         :param test_mode: Флаг, указывающий на тестовый режим. При включенном тестовом режиме задается фиксированное начальное значение для генератора случайных чисел для воспроизводимости.
 
@@ -132,7 +132,7 @@ class LayerBuilder(InitializationFunctions):
             neuron_output = sum(i * w + bias if switch else i * w - bias for i, w in zip(input_dataset, weights[n]))
             # Результат взвешенной суммы передается функции активации,
             # и результат этой функции добавляется в список результатов.
-            neuron_dataset.append(activate_func(neuron_output))
+            neuron_dataset.append(act_func(neuron_output))
         logger.info(f'Результаты вычислений: {neuron_dataset}')
         return neuron_dataset
 
@@ -143,7 +143,7 @@ class HiddenLayer(LayerBuilder):
     def __init__(
             self, training, init_func, input_dataset: list[int | float],
             weights: list[list[float]], bias: float | tuple[float, float],
-            neuron_number: int, activate_func: callable, switch: bool, test_mode: bool
+            neuron_number: int, act_func: callable, switch: bool, test_mode: bool
     ):
         if test_mode:
             seed(0)
@@ -155,7 +155,7 @@ class HiddenLayer(LayerBuilder):
         self.bias: float | tuple[float, float] = self.select_bias_mode(
             training, bias, init_func, test_mode
         )
-        self.activate_func: callable = activate_func
+        self.act_func: callable = act_func
         self.switch: bool = switch
         self.test_mode = test_mode
 
@@ -167,7 +167,7 @@ class HiddenLayer(LayerBuilder):
         # Метод calculate_neuron_dataset вызывается для расчета выходных данных каждого нейрона.
         result: list[float] = self.calculate_neuron_dataset(
             self.input_dataset, self.neuron_number, self.weights, self.bias,
-            self.activate_func, self.switch, self.test_mode
+            self.act_func, self.switch, self.test_mode
         )
         logger.debug(self)
         return result

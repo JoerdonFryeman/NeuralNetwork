@@ -158,7 +158,7 @@ class MachineLearning(Visualisation, Data):
         :return: Кортеж с обновленными весами и смещением (bias) слоя.
         """
         for epoch in range(epochs):
-            layer.input_dataset = self.get_data_sample(self.data_class_name, self.data_number)
+            layer.input_dataset = self.get_data_sample(self.serial_class_number, self.serial_data_number)
             prediction: float = sum(layer.get_layer_dataset())
             target: float = self.get_target_value_by_key(data_key)
             gradient: float = prediction - target
@@ -191,9 +191,9 @@ class MachineLearning(Visualisation, Data):
         weights: dict[str, list[list[float]]] = {}
         biases: dict[str, list[float]] = {}
 
-        for data_key, data_samples in self.dataset[self.data_name].items():
+        for data_key, data_samples in self.dataset[self.data_number].items():
             for _ in data_samples:
-                hidden_layer_first.input_dataset = self.get_data_sample(self.data_class_name, self.data_number)
+                hidden_layer_first.input_dataset = self.get_data_sample(self.serial_class_number, self.serial_data_number)
                 self._train(
                     data_key, hidden_layer_first, epochs, learning_rate, learning_decay,
                     error_tolerance, regularization, lasso_regularization, ridge_regularization

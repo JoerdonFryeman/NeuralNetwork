@@ -39,7 +39,7 @@ def encode_images_from_directory(dir_path: str, output_file: str, invert_colors:
     """
     if not os.path.isdir(dir_path):
         raise ValueError(f'Каталог {dir_path} не существует!')
-    numbers_data = {}
+    classes_data = {}
     for sub_dir_name in sorted(os.listdir(dir_path)):
         sub_dir_path = os.path.join(dir_path, sub_dir_name)
         if not os.path.isdir(sub_dir_path):
@@ -55,8 +55,8 @@ def encode_images_from_directory(dir_path: str, output_file: str, invert_colors:
                     print(f'Не удалось обработать {file_name}: {e}')
             else:
                 raise FileNotFoundError(f'Ожидаемый файл {file_name} не существует в каталоге {sub_dir_path}!')
-        numbers_data[sub_dir_name] = images_data
+        classes_data[sub_dir_name] = images_data
     # Приведение структуры к формату с ключом 'numbers'.
-    data = {'numbers': numbers_data}
+    data = {'classes': classes_data}
     with open(output_file, 'w') as file:
         json.dump(data, file, ensure_ascii=False, indent=4)

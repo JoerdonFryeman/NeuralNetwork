@@ -1,10 +1,15 @@
-from configuration import logger, select_os_command
+from configuration import select_os_command, logger
 from data import Data
 from neural_network import NeuralNetwork
 
 
 class Control:
     """Класс управляет параметрами и характеристиками нейронной сети."""
+
+    __slots__ = (
+        'training', 'init_func', 'epochs', 'learning_rate', 'learning_decay', 'error_tolerance',
+        'regularization', 'lasso_regularization', 'ridge_regularization', 'test_mode', 'visual'
+    )
 
     def __init__(self):
         """
@@ -45,7 +50,7 @@ def init_network() -> None | float:
     :return: Возвращает результат вычислений выходного слоя, если сеть не находится в режиме обучения.
     """
     network = NeuralNetwork(
-        control.training, control.init_func, data.get_data_sample(data.data_class_name, data.data_number)
+        control.training, control.init_func, data.get_data_sample(data.serial_class_number, data.serial_data_number)
     )
     output_layer = network.build_neural_network(
         control.epochs, control.learning_rate, control.learning_decay, control.error_tolerance, control.regularization,
@@ -55,6 +60,7 @@ def init_network() -> None | float:
         if control.visual:
             network.get_info_visualisation(network.input_dataset, network.layers, output_layer)
         return output_layer
+    return None
 
 
 def change_training_mode(training_mode: str) -> None:
