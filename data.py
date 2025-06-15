@@ -28,7 +28,7 @@ class Data:
         :return: Количество данных или имя "класса" данных.
         """
         if value_type == 'serial_data_number':
-            return len(dict(list(enumerate(self.dataset[self.data_number].get(str(self.serial_class_number), []), 1))))
+            return len(dict(enumerate(self.dataset[self.data_number].get(str(self.serial_class_number), []), 1)))
         elif value_type == 'serial_class_number':
             return len(dict(enumerate(self.dataset[self.data_number])).keys())
         else:
@@ -41,7 +41,7 @@ class Data:
         :param class_name: Порядковый номер класса данных.
         :return: Словарь с данными, где ключи - порядковые номера классов изображений.
         """
-        return dict(list(enumerate(self.dataset[self.data_number].get(str(class_name), []), 1)))
+        return dict(enumerate(self.dataset[self.data_number].get(str(class_name), []), 1))
 
     def create_output_layer_data(self, output_layer: list[float], file_exist: bool = True) -> None:
         """

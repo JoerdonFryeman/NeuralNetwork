@@ -3,22 +3,20 @@ import json
 from platform import system
 from logging import config, getLogger
 
+directories: tuple[str, str, str, str, str, str, str, str, str] = (
+    'weights_biases_and_data', 'temporary_files', 'tools', 'network', 'machine_learning',
+    'learning_data', 'learning_data', 'data', 'config_files'
+)
+for d in directories:
+    try:
+        os.mkdir(d)
+    except FileExistsError:
+        pass
+
 use_image_encoder: bool = True
 directory_path: str = 'numbers'
 invert_colors: bool = False
 image_size: tuple[int, int] = (28, 28)
-
-try:
-    directories: tuple[str, str, str, str, str, str, str] = (
-        'weights_biases_and_data', 'temporary_files', 'learning_data',
-        'learning_data/numbers/', 'config_files', 'encoders', 'tests'
-    )
-    # Создаёт необходимый каталог в случае его отсутствия.
-    for i in range(len(directories)):
-        os.mkdir(directories[i])
-        i += 1
-except FileExistsError:
-    pass
 
 if use_image_encoder:
     # Запускает встроенный скрипт для преобразования изображений в числовые массивы.

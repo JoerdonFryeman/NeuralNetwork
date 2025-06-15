@@ -8,7 +8,7 @@ class Control:
 
     __slots__ = (
         'training', 'init_func', 'epochs', 'learning_rate', 'learning_decay', 'error_tolerance',
-        'regularization', 'lasso_regularization', 'ridge_regularization', 'test_mode', 'visual'
+        'regularization', 'lasso_regularization', 'ridge_regularization', 'visual'
     )
 
     def __init__(self):
@@ -24,7 +24,7 @@ class Control:
         :param regularization (float): Коэффициент регуляризации. По умолчанию 0.001.
         :param lasso_regularization (bool): Флаг использования L1 регуляризации. По умолчанию False.
         :param ridge_regularization (bool): Флаг использования L2 регуляризации. По умолчанию True.
-        :param test_mode (bool): Флаг тестового режима. По умолчанию False.
+
         :param visual (bool): Флаг режима визуализации. По умолчанию True.
         """
         self.training: bool = False
@@ -36,7 +36,7 @@ class Control:
         self.regularization: float = 0.001
         self.lasso_regularization: bool = False
         self.ridge_regularization: bool = True
-        self.test_mode: bool = False
+
         self.visual: bool = True
 
 
@@ -47,14 +47,15 @@ data = Data()
 def init_network() -> None | float:
     """
     Инициализирует параметры управления и создает объекты нейронной сети.
+
     :return: Возвращает результат вычислений выходного слоя, если сеть не находится в режиме обучения.
     """
     network = NeuralNetwork(
         control.training, control.init_func, data.get_data_sample(data.serial_class_number, data.serial_data_number)
     )
     output_layer = network.build_neural_network(
-        control.epochs, control.learning_rate, control.learning_decay, control.error_tolerance, control.regularization,
-        control.lasso_regularization, control.ridge_regularization, control.test_mode
+        control.epochs, control.learning_rate, control.learning_decay, control.error_tolerance,
+        control.regularization, control.lasso_regularization, control.ridge_regularization
     )
     if not control.training:
         if control.visual:
@@ -66,10 +67,12 @@ def init_network() -> None | float:
 def change_training_mode(training_mode: str) -> None:
     """
     Управляет консольными командами.
+
     :param training_mode: Команда начала обучения нейросети.
     """
     commands_yes: tuple[str, str, str, str] = ('да', 'д', 'yes', 'y')
     commands_no: tuple[str, str, str, str] = ('нет', 'н', 'no', 'n')
+
     if training_mode.lower() in commands_yes:
         control.training = True
         select_os_command('clear_screen')
