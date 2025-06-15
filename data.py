@@ -43,6 +43,20 @@ class Data:
         """
         return dict(enumerate(self.dataset[self.data_number].get(str(class_name), []), 1))
 
+    def get_data_sample(self, class_name: int, serial_data_number: int) -> any:
+        """
+        Возвращает данные для текущего изображения.
+
+        :param class_name: Порядковый номер класса данных.
+        :param serial_data_number: Номер данных, для которых нужно нормированное значение.
+
+        :return: Данные для текущего изображения.
+        """
+        result = self.get_data_dict(class_name).get(serial_data_number)
+        if result is None:
+            raise ValueError(f'Номер {serial_data_number} или номер {class_name} за пределами диапазона!')
+        return result
+
     def create_output_layer_data(self, output_layer: list[float], file_exist: bool = True) -> None:
         """
         Создаёт словарь с выходными данными.
@@ -62,6 +76,26 @@ class Data:
             else:
                 output_layer_data[str(i + 1)] = [0.0 * self.get_data_dict_value('serial_data_number')]
         save_json_data('weights_biases_and_data', 'output_layer_data', output_layer_data)
+
+    def load_output_layer_data(self, init_network, training_mode: bool) -> None:
+        """
+        Загружает сохранённые выходные данные.
+
+        :param init_network: Ссылка на функцию инициализации нейросети.
+        :param training_mode: Флаг режима обучения.
+        """
+        output_layer_data: list[int | float] = []
+        # В циклах, равных количеству данных в классе и количеству самих классов, загружаются выходные данные.
+        for _ in range(self.get_data_dict_value('serial_data_number')):
+            for _ in range(self.get_data_dict_value('serial_class_number')):
+                result: int | float = init_network()
+                output_layer_data.append(result)
+                self.serial_class_number += 1
+            self.serial_class_number: int = 1
+            self.serial_data_number += 1
+        # В режиме обучения запускается метод создания словаря входных данных.
+        if training_mode:
+            self.create_output_layer_data(output_layer_data)
 
     def calculate_classification(self, output_layer: float, margin: float = float('inf')) -> int:
         """
@@ -89,47 +123,3 @@ class Data:
         except FileNotFoundError:
             self.create_output_layer_data([0.0 * self.get_data_dict_value('serial_data_number')], False)
         return serial_class_number
-
-    def load_output_layer_data(self, init_network, training_mode: bool) -> None:
-        """
-        Загружает сохранённые выходные данные.
-
-        :param init_network: Ссылка на функцию инициализации нейросети.
-        :param training_mode: Флаг режима обучения.
-        """
-        output_layer_data: list[int | float] = []
-        # В циклах, равных количеству данных в классе и количеству самих классов, загружаются выходные данные.
-        for _ in range(self.get_data_dict_value('serial_data_number')):
-            for _ in range(self.get_data_dict_value('serial_class_number')):
-                result: int | float = init_network()
-                output_layer_data.append(result)
-                self.serial_class_number += 1
-            self.serial_class_number: int = 1
-            self.serial_data_number += 1
-        # В режиме обучения запускается метод создания словаря входных данных.
-        if training_mode:
-            self.create_output_layer_data(output_layer_data)
-
-    def get_data_sample(self, class_name: int, serial_data_number: int) -> any:
-        """
-        Возвращает данные для текущего изображения.
-
-        :param class_name: Порядковый номер класса данных.
-        :param serial_data_number: Номер данных, для которых нужно нормированное значение.
-
-        :return: Данные для текущего изображения.
-        """
-        result = self.get_data_dict(class_name).get(serial_data_number)
-        if result is None:
-            raise ValueError(f'Номер {serial_data_number} или номер {class_name} за пределами диапазона!')
-        return result
-
-    def get_target_value_by_key(self, value_by_key: str) -> float:
-        """
-        Возвращает значение целевого объекта на основе ключа словаря.
-
-        :param value_by_key: Ключ словаря данных.
-        :return: Целевое значение целевого объекта.
-        """
-        target_values = {key: float(key) / 10 for key in self.dataset[self.data_number]}
-        return target_values.get(value_by_key, 0.0)

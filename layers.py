@@ -26,11 +26,11 @@ class LayerBuilder(InitializationFunctions):
 
         :return: Список значений, вычисленных для каждого нейрона после применения функции активации.
         """
-        logger.info(f'Вычисление данных для {neuron_number} нейронов с bias={bias}.')
         # Для каждого нейрона вычисляется взвешенная сумма входных данных и соответствующих весов.
         # Результат взвешенной суммы передается функции активации.
+        # logger.info(f'Вычисление данных для {neuron_number} нейронов с bias={bias}.')
         result = [act_func(sum(i * w + bias for i, w in zip(input_dataset, weights[n]))) for n in range(neuron_number)]
-        logger.info(f'Результаты вычислений: {result}')
+        # logger.info(f'Результаты вычислений: {result}')
         return result
 
     def _select_init_func(
@@ -134,5 +134,4 @@ class HiddenLayer(LayerBuilder):
         result: list[float] = self.calculate_neuron_dataset(
             self.input_dataset, self.weights, self.bias, self.neuron_number, self.act_func
         )
-        logger.debug(self)
         return result

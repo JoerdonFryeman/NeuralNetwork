@@ -2,11 +2,11 @@ from pickle import load
 
 from configuration import logger
 from layers import LayerBuilder, HiddenLayer
-from machine_learning import MachineLearning
+from machine_learning.train import Train
 from support_functions import ActivationFunctions
 
 
-class NeuralNetwork(MachineLearning, ActivationFunctions, LayerBuilder):
+class NeuralNetwork(Train, ActivationFunctions, LayerBuilder):
     """Класс построения многослойной нейронной сети."""
 
     __slots__ = ('training', 'init_func', 'input_dataset', 'layers')
