@@ -1,9 +1,9 @@
 import unittest
 from unittest.mock import patch, mock_open
 
-from configuration import get_json_data
-from data import Data
-from support_functions import ActivationFunctions, InitializationFunctions
+from config_files.configuration import get_json_data
+from data.data import Data
+from tools.support_functions import ActivationFunctions, InitializationFunctions
 
 
 class GeneralTestParameters(unittest.TestCase, ActivationFunctions, InitializationFunctions, Data):

@@ -1,7 +1,7 @@
 from random import uniform
 
-from configuration import logger
-from support_functions import InitializationFunctions
+from config_files.configuration import logger
+from tools.support_functions import InitializationFunctions
 
 
 class LayerBuilder(InitializationFunctions):

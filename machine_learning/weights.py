@@ -1,9 +1,9 @@
 import os
 import pickle
 
-from configuration import logger
-from machine_learning.regularization import Regularization
-from machine_learning.calculations import Calculations
+from config_files.configuration import logger
+from .regularization import Regularization
+from .calculations import Calculations
 
 
 class Weights(Calculations, Regularization):

@@ -1,9 +1,10 @@
-from configuration import get_json_data
-from data import Data
-from support_functions import ActivationFunctions
+from config_files.configuration import get_json_data
+from data.data import Data
+from data.classification import Classification
+from .support_functions import ActivationFunctions
 
 
-class Visualisation(ActivationFunctions, Data):
+class Visualisation(ActivationFunctions, Data, Classification):
     """Класс содержит методы визуализации процесса обучения и результатов работы нейронной сети."""
 
     @staticmethod

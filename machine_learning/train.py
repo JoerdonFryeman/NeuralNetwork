@@ -1,6 +1,6 @@
-from data import Data
-from visualisation import Visualisation
-from machine_learning.weights import Weights
+from data.data import Data
+from tools.visualisation import Visualisation
+from .weights import Weights
 
 
 class Train(Visualisation, Weights, Data):

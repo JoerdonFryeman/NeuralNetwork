@@ -1,6 +1,6 @@
-from configuration import select_os_command, logger
-from data import Data
-from neural_network import NeuralNetwork
+from config_files.configuration import select_os_command, logger
+from data.data import Data
+from network.neural_network import NeuralNetwork
 
 
 class Control:

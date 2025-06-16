@@ -1,9 +1,9 @@
 from pickle import load
 
-from configuration import logger
-from layers import LayerBuilder, HiddenLayer
+from config_files.configuration import logger
 from machine_learning.train import Train
-from support_functions import ActivationFunctions
+from tools.support_functions import ActivationFunctions
+from .layers import LayerBuilder, HiddenLayer
 
 
 class NeuralNetwork(Train, ActivationFunctions, LayerBuilder):

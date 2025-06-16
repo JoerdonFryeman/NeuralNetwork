@@ -1,4 +1,4 @@
-from configuration import get_json_data, save_json_data
+from config_files.configuration import get_json_data, save_json_data
 
 
 class Data:
@@ -96,30 +96,3 @@ class Data:
         # В режиме обучения запускается метод создания словаря входных данных.
         if training_mode:
             self.create_output_layer_data(output_layer_data)
-
-    def calculate_classification(self, output_layer: float, margin: float = float('inf')) -> int:
-        """
-        Находит наиболее близкое к output_sum с учётом margin значение.
-
-        :param output_layer: Выходное значение.
-        :param margin: Минимальная разность.
-
-        :return: Имя "класса" данных в виде порядкового номера.
-        """
-        serial_class_number = None
-        min_difference: float = float(f'{margin:.10f}')
-        try:
-            results: dict = get_json_data('weights_biases_and_data', 'output_layer_data')
-            # Прохождение в цикле по всем ключам и значениям словаря results.
-            for name, result in results.items():
-                for value in result:
-                    # Вычисляется абсолютная разность.
-                    difference: float = abs(output_layer - value)
-                    # Условие для обновления ближайшего класса.
-                    if difference < min_difference:
-                        min_difference = difference
-                        # Обновляется ближайший класс.
-                        serial_class_number = name
-        except FileNotFoundError:
-            self.create_output_layer_data([0.0 * self.get_data_dict_value('serial_data_number')], False)
-        return serial_class_number
