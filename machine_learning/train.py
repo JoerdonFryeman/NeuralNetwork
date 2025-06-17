@@ -13,7 +13,7 @@ class Train(Visualisation, Weights, Data):
         :param value_by_key: Ключ словаря данных.
         :return: Целевое значение целевого объекта.
         """
-        target_values = {key: float(key) / 10 for key in self.dataset[self.data_number]}
+        target_values = {key: float(key) / 10 for key in self.dataset[self.data_name]}
         return target_values.get(value_by_key, 0.0)
 
     def _train(
@@ -69,7 +69,7 @@ class Train(Visualisation, Weights, Data):
         weights: dict[str, list[list[float]]] = {}
         biases: dict[str, list[float]] = {}
 
-        for data_key, data_samples in self.dataset[self.data_number].items():
+        for data_key, data_samples in self.dataset[self.data_name].items():
             for _ in data_samples:
                 hidden_layer_first.input_dataset = self.get_data_sample(
                     self.serial_class_number, self.serial_data_number

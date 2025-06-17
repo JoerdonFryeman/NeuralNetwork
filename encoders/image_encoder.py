@@ -45,7 +45,7 @@ def encode_images_from_directory(dir_path: str, output_file: str, invert_colors:
         if not os.path.isdir(sub_dir_path):
             continue
         images_data = []
-        for idx, file_name in enumerate(sorted(os.listdir(sub_dir_path))):
+        for file_name in sorted(os.listdir(sub_dir_path)):
             file_path = os.path.join(sub_dir_path, file_name)
             if os.path.isfile(file_path):
                 try:

@@ -4,18 +4,18 @@ from config_files.configuration import get_json_data, save_json_data
 class Data:
     """Класс предназначен для работы с массивами данных."""
 
-    __slots__ = ('data_number', 'serial_class_number', 'serial_data_number', 'dataset')
+    __slots__ = ('data_name', 'serial_class_number', 'serial_data_number', 'dataset')
 
     def __init__(self):
         """
         Инициализирует объекты класса с параметрами по умолчанию.
 
-        :param data_number (str): Ключ-номер массива данных.
+        :param data_name (str): Ключ-название массива данных.
         :param serial_class_number (int): Начальный порядковый номер класса данных.
         :param serial_data_number (int): Начальный порядковый номер данных.
         :param dataset (dict): Загружаемый массив данных.
         """
-        self.data_number: str = 'classes'
+        self.data_name: str = 'classes'
         self.serial_class_number: int = 1
         self.serial_data_number: int = 1
         self.dataset: dict = get_json_data('weights_biases_and_data', 'input_dataset')
@@ -28,33 +28,33 @@ class Data:
         :return: Количество данных или имя "класса" данных.
         """
         if value_type == 'serial_data_number':
-            return len(dict(enumerate(self.dataset[self.data_number].get(str(self.serial_class_number), []), 1)))
+            return len(dict(enumerate(self.dataset[self.data_name].get(str(self.serial_class_number), []), 1)))
         elif value_type == 'serial_class_number':
-            return len(dict(enumerate(self.dataset[self.data_number])).keys())
+            return len(dict(enumerate(self.dataset[self.data_name])).keys())
         else:
             raise ValueError(f'Неизвестный тип значений: {value_type}')
 
-    def get_data_dict(self, class_name: int) -> dict:
+    def get_data_dict(self, serial_class_number: int) -> dict:
         """
         Возвращает словарь данных.
 
-        :param class_name: Порядковый номер класса данных.
+        :param serial_class_number: Порядковый номер класса данных.
         :return: Словарь с данными, где ключи - порядковые номера классов изображений.
         """
-        return dict(enumerate(self.dataset[self.data_number].get(str(class_name), []), 1))
+        return dict(enumerate(self.dataset[self.data_name].get(str(serial_class_number), []), 1))
 
-    def get_data_sample(self, class_name: int, serial_data_number: int) -> any:
+    def get_data_sample(self, serial_class_number: int, serial_data_number: int) -> any:
         """
         Возвращает данные для текущего изображения.
 
-        :param class_name: Порядковый номер класса данных.
+        :param serial_class_number: Порядковый номер класса данных.
         :param serial_data_number: Номер данных, для которых нужно нормированное значение.
 
         :return: Данные для текущего изображения.
         """
-        result = self.get_data_dict(class_name).get(serial_data_number)
+        result = self.get_data_dict(serial_class_number).get(serial_data_number)
         if result is None:
-            raise ValueError(f'Номер {serial_data_number} или номер {class_name} за пределами диапазона!')
+            raise ValueError(f'Номер {serial_data_number} или номер {serial_class_number} за пределами диапазона!')
         return result
 
     def create_output_layer_data(self, output_layer: list[float], file_exist: bool = True) -> None:
