@@ -6,15 +6,17 @@ from .weights import Weights
 class Train(Visualisation, Weights, Data):
     """Класс отвечает за процесс обучения нейронной сети."""
 
-    def get_target_value_by_key(self, value_by_key: str) -> float:
+    def _get_target(self, data_key: str) -> float:
         """
-        Возвращает значение целевого объекта на основе ключа словаря.
+        Возвращает значение целевого объекта.
 
-        :param value_by_key: Ключ словаря данных.
-        :return: Целевое значение целевого объекта.
+        :param data_key: Ключ словаря данных.
+
+        :return: Целевое значение объекта.
         """
-        target_values = {key: float(key) / 10 for key in self.dataset[self.data_name]}
-        return target_values.get(value_by_key, 0.0)
+        dataset_and_target = self.dataset[self.data_name]
+        target_values = {key: float(dataset_and_target[key][1]) / 10 for key in dataset_and_target}
+        return target_values.get(data_key, 0.0)
 
     def _train(
             self, data_key: str, layer, epochs: int, learning_rate: float, learning_decay: float,
@@ -24,7 +26,7 @@ class Train(Visualisation, Weights, Data):
         Обучает слой на основании данных.
 
         :param layer: Объект слоя.
-        :param data_key: Ключ данных.
+        :param data_key: Ключ словаря данных.
         :param epochs: Количество эпох для обучения.
         :param learning_rate: Скорость обучения.
         :param learning_decay: Уменьшение скорости обучения.
@@ -38,7 +40,7 @@ class Train(Visualisation, Weights, Data):
         for epoch in range(epochs):
             layer.input_dataset = self.get_data_sample(self.serial_class_number, self.serial_data_number)
             prediction: float = sum(layer.get_layer_dataset())
-            target: float = self.get_target_value_by_key(data_key)
+            target: float = self._get_target(data_key)
             gradient: float = prediction - target
             self._update_weights(
                 layer, gradient, lasso_regularization, ridge_regularization, learning_rate, regularization
@@ -70,7 +72,7 @@ class Train(Visualisation, Weights, Data):
         biases: dict[str, list[float]] = {}
 
         for data_key, data_samples in self.dataset[self.data_name].items():
-            for _ in data_samples:
+            for _ in data_samples[0]:
                 hidden_layer_first.input_dataset = self.get_data_sample(
                     self.serial_class_number, self.serial_data_number
                 )

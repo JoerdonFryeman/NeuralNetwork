@@ -32,3 +32,6 @@ temporary_files/data.log
 # Notes
 temporary_files/notes.py
 temporary_files/notes.txt
+
+# Learning Data
+/learning_data/numbers/

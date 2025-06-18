@@ -55,7 +55,8 @@ def encode_images_from_directory(dir_path: str, output_file: str, invert_colors:
                     print(f'Не удалось обработать {file_name}: {e}')
             else:
                 raise FileNotFoundError(f'Ожидаемый файл {file_name} не существует в каталоге {sub_dir_path}!')
-        classes_data[sub_dir_name] = images_data
+        # Добавление дублирующего ключа в конце списка данных.
+        classes_data[sub_dir_name] = [images_data, float(sub_dir_name)]
     # Приведение структуры к формату с ключом 'numbers'.
     data = {'classes': classes_data}
     with open(output_file, 'w') as file:

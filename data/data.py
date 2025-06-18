@@ -28,7 +28,7 @@ class Data:
         :return: Количество данных или имя "класса" данных.
         """
         if value_type == 'serial_data_number':
-            return len(dict(enumerate(self.dataset[self.data_name].get(str(self.serial_class_number), []), 1)))
+            return len(dict(enumerate(self.dataset[self.data_name].get(str(self.serial_class_number), [])[0], 1)))
         elif value_type == 'serial_class_number':
             return len(dict(enumerate(self.dataset[self.data_name])).keys())
         else:
@@ -41,7 +41,7 @@ class Data:
         :param serial_class_number: Порядковый номер класса данных.
         :return: Словарь с данными, где ключи - порядковые номера классов изображений.
         """
-        return dict(enumerate(self.dataset[self.data_name].get(str(serial_class_number), []), 1))
+        return dict(enumerate(self.dataset[self.data_name].get(str(serial_class_number), [])[0], 1))
 
     def get_data_sample(self, serial_class_number: int, serial_data_number: int) -> any:
         """
