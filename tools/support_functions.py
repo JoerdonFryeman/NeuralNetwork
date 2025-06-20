@@ -44,14 +44,14 @@ class ActivationFunctions:
         :param x: Входное значение.
         :return: Значение функции tanh для входного значения.
         """
-        e_pos_2x: float = 1.0
-        e_neg_2x: float = 1.0
-        n: int = 10
+        exp_pos_2x: float = 1.0
+        exp_neg_2x: float = 1.0
 
-        for i in range(n, 0, -1):
-            e_pos_2x = 1 + 2 * x * e_pos_2x / i
-            e_neg_2x = 1 - 2 * x * e_neg_2x / i
-        return (e_pos_2x - e_neg_2x) / (e_pos_2x + e_neg_2x)
+        for i in range(1, 11):
+            exp_pos_2x *= (2 * x) / i + 1
+            exp_neg_2x *= (2 * -x) / i + 1
+
+        return (exp_pos_2x - exp_neg_2x) / (exp_pos_2x + exp_neg_2x)
 
     @staticmethod
     def get_leaky_relu(x: float, alpha: float = 0.01) -> float:
