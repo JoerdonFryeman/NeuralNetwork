@@ -59,4 +59,4 @@ class Visualisation(ActivationFunctions, Data, Interpretation):
 
         print(f'Слой: output_layer\nДанные: {output_layer:.10f}\n')
         print('Интерпретация данных:\n')
-        self.get_interpretation(float(f'{output_layer:.10f}'), self.get_answer)
+        self.get_interpretation(float(f'{output_layer:.10f}'), self.get_number_visualisation)
