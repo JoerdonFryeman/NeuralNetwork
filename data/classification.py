@@ -3,7 +3,7 @@ from config_files.configuration import get_json_data, logger
 
 class Classification:
     @staticmethod
-    def calculate_classification(output_layer: float, margin: float = float('inf')) -> int:
+    def calculate_classification(output_layer: float, margin: float = float('inf')) -> str:
         """
         Находит наиболее близкое к output_sum с учётом margin значение.
 

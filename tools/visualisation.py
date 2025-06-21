@@ -1,10 +1,9 @@
-from config_files.configuration import get_json_data
+from .interpretation import Interpretation
 from data.data import Data
-from data.classification import Classification
 from .support_functions import ActivationFunctions
 
 
-class Visualisation(ActivationFunctions, Data, Classification):
+class Visualisation(ActivationFunctions, Data, Interpretation):
     """Класс содержит методы визуализации процесса обучения и результатов работы нейронной сети."""
 
     @staticmethod
@@ -37,26 +36,6 @@ class Visualisation(ActivationFunctions, Data, Classification):
             f'{sum(output_layer.get_layer_dataset()) * 10:.0f}\n'
         )
 
-    def _get_number_visualisation(self, output_layer: float) -> None:
-        """
-        Выводит графическое представление результата.
-
-        :param output_layer: Выходные данные.
-        """
-        data_class_name: int = self.calculate_classification(output_layer)
-        horizontal_line_first: int = 54
-        horizontal_line_second: int = 20
-
-        if data_class_name is not None:
-            print(f'┌{"─" * horizontal_line_first}┐')
-            print(f'│{" " * horizontal_line_second}{" " * 14}{" " * horizontal_line_second}│')
-            for number in get_json_data('config_files', 'numbers')[str(data_class_name)]:
-                print(f'│{" " * horizontal_line_second}{number}{" " * horizontal_line_second}│')
-            print(f'│{" " * horizontal_line_second}{" " * 14}{" " * horizontal_line_second}│')
-            print(f'└{"─" * horizontal_line_first}┘')
-        else:
-            print('Не могу интерпретировать значение результата!')
-
     def get_info_visualisation(
             self, input_dataset: list[int | float], layers: dict, output_layer: float
     ) -> None:
@@ -80,4 +59,4 @@ class Visualisation(ActivationFunctions, Data, Classification):
 
         print(f'Слой: output_layer\nДанные: {output_layer:.10f}\n')
         print('Интерпретация данных:\n')
-        self._get_number_visualisation(float(f'{output_layer:.10f}'))
+        self.get_interpretation(float(f'{output_layer:.10f}'), self.get_answer)
