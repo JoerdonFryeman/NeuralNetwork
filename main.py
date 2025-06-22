@@ -1,4 +1,4 @@
-from config_files.configuration import select_os_command, logger
+from config_files.base import select_os_command, logger
 from data.data import Data
 from network.neural_network import NeuralNetwork
 
@@ -7,15 +7,17 @@ class Control:
     """Класс управляет параметрами и характеристиками нейронной сети."""
 
     __slots__ = (
-        'training', 'init_func', 'epochs', 'learning_rate', 'learning_decay', 'error_tolerance',
-        'regularization', 'lasso_regularization', 'ridge_regularization', 'visual'
+        'training_mode_message', 'training', 'init_func', 'epochs', 'learning_rate', 'learning_decay',
+        'error_tolerance', 'regularization', 'lasso_regularization', 'ridge_regularization', 'visual'
     )
 
     def __init__(self):
         """
         Инициализирует объект класса с параметрами по умолчанию.
 
+        :param training_mode_message (bool): Флаг сообщения активации режима обучения. По умолчанию True.
         :param training (bool): Флаг режима обучения. По умолчанию False.
+
         :param init_func (str): Метод инициализации весов сети. По умолчанию 'xavier'.
         :param epochs (int): Количество эпох обучения. По умолчанию 1000.
         :param learning_rate (float): Начальная скорость обучения. По умолчанию 0.001.
@@ -27,7 +29,9 @@ class Control:
 
         :param visual (bool): Флаг режима визуализации. По умолчанию True.
         """
+        self.training_mode_message: bool = True
         self.training: bool = False
+
         self.init_func: str = 'xavier'
         self.epochs: int = 1000
         self.learning_rate: float = 0.001
@@ -93,8 +97,8 @@ def change_training_mode(training_mode: str) -> None:
 
 def main() -> None:
     """Запускающая все процессы главная функция."""
-    select_os_command('clear_screen')
-    change_training_mode(input('Активировать режим обучения?\n'))
+    if control.training_mode_message:
+        change_training_mode(input('Активировать режим обучения?\n'))
     try:
         if control.training:
             init_network()
@@ -107,7 +111,7 @@ def main() -> None:
     except ValueError as v_error:
         logger.error(f'Проверка выдала ошибку: {v_error}')
     except ZeroDivisionError as z_error:
-        logger.error(f'Возможно неверное именование! Имя класса (каталога) данных не должно равняться нулю! {z_error}')
+        logger.error(f'Целевое значение (target) не должно равняться нулю! {z_error}')
     except Exception as e_error:
         logger.error(f'Произошла непредвиденная ошибка: {e_error}')
 
