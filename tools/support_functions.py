@@ -29,10 +29,9 @@ class ActivationFunctions:
         :param x: Входное значение.
         :return: Значение сигмоидной функции для входного значения.
         """
-        n: int = 10
         exp: float = 1.0
 
-        for i in range(n, 0, -1):
+        for i in range(10, 0, -1):
             exp = 1 + x * exp / i
         return 1 / (1 + exp)
 
