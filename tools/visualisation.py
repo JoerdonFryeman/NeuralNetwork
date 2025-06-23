@@ -33,7 +33,7 @@ class Visualisation(ActivationFunctions, Data, Interpretation):
         """
         print(
             f'\nОбучение класса данных {data_class_name} завершено, результат: '
-            f'{sum(output_layer.get_layer_dataset()) * 10:.0f}\n'
+            f'{sum(output_layer.get_layer_dataset()) * 10:.10f}\n'
         )
 
     def get_info_visualisation(
