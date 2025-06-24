@@ -1,7 +1,8 @@
 from .base import *
 from games.rps import RPS
+from encoders.text_encoder import TextEncoder
 
-# Запускает скрипт для преобразования изображений в числовые массивы.
+# Запускает скрипт преобразования изображений в числовые массивы.
 
 use_image_encoder: bool = True
 directory_path: str = 'numbers'
@@ -16,9 +17,19 @@ if use_image_encoder:
         f'learning_data/{directory_path}', 'weights_biases_and_data/input_dataset.json', invert_colors, image_size
     )
 
+# Запускает скрипт преобразования текста в числовые массивы.
+
+use_text_encoder: bool = False
+
+if use_text_encoder:
+    text_encoder = TextEncoder()
+    select_os_command('clear_screen')
+    text_encoder.encode_text_to_unicode()
+
 # Запускает скрипт игры "Камень, ножницы, бумага".
 
 use_rps: bool = False
+
 if use_rps:
     rps = RPS()
     select_os_command('clear_screen')

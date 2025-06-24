@@ -1,7 +1,6 @@
-import json
 from random import choice
 
-from config_files.base import get_json_data
+from config_files.base import get_json_data, save_json_data
 
 
 class RPS:
@@ -16,32 +15,7 @@ class RPS:
     result = {1: 'Ничья!', 2: 'Нейросеть проиграла!', 3: 'Нейросеть выиграла!'}
 
     @staticmethod
-    def save_computer_choice(computer: list[float]) -> None:
-        """
-        Сохраняет выбор компьютера в JSON-файл.
-
-        :param computer: Выбор компьютера, который необходимо сохранить.
-        """
-        data = {"classes": {"1": [[computer], 0.01]}}
-        with open('weights_biases_and_data/input_dataset.json', 'w') as file:
-            json.dump(data, file, ensure_ascii=False, indent=4)
-
-    @staticmethod
-    def open_computer_choice(directory: str, name: str) -> dict:
-        """
-        Загружает выбор компьютера из JSON-файла.
-
-        :param directory: Директория, в которой находится файл.
-        :param name: Имя файла (без расширения), из которого необходимо загрузить данные.
-
-        :return: Возвращает словарь с данными, загруженными из JSON-файла.
-        :raises FileNotFoundError: Если файл не найден по указанному пути.
-        """
-        with open(f'{directory}/{name}.json', encoding='UTF-8') as json_file:
-            data = json.load(json_file)
-        return data
-
-    def get_computer_choice(self) -> list[float]:
+    def get_computer_choice() -> list[float]:
         """
         Генерирует случайный выбор компьютера для игры "Камень, ножницы, бумага".
 
@@ -54,7 +28,7 @@ class RPS:
             print(f'\nОтвет компьютера: {get_json_data('config_files/ascii_arts', 'rps')['scissors']}')
         elif computer == [0.0, 0.0, 1.0]:
             print(f'\nОтвет компьютера: {get_json_data('config_files/ascii_arts', 'rps')['paper']}')
-        self.save_computer_choice(computer)
+        save_json_data('weights_biases_and_data', 'input_dataset', computer)
         return computer
 
     @staticmethod
@@ -86,7 +60,7 @@ class RPS:
 
         :return: Возвращает None.
         """
-        computer = self.open_computer_choice('weights_biases_and_data', 'input_dataset')
+        computer = get_json_data('weights_biases_and_data', 'input_dataset')
         counter = 1
         for i in range(1, 4):
             for j in range(1, 4):

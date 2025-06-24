@@ -49,12 +49,12 @@ class Interpretation(RPS, Classification):
 
         :param data_class_name: Название класса данных, определяющее, какой ответ будет выведен.
         """
-        if data_class_name in ['1', '2', '3']:
+        if data_class_name in ['1', ]:
             print(get_json_data('config_files/ascii_arts', 'answer')['yes'])
-        elif data_class_name == '4':
-            print(get_json_data('config_files/ascii_arts', 'answer')['maybe'])
-        else:
+        elif data_class_name in ['2', ]:
             print(get_json_data('config_files/ascii_arts', 'answer')['no'])
+        else:
+            print(get_json_data('config_files/ascii_arts', 'answer')['maybe'])
 
     def get_rock_paper_scissors(self, data_class_name: str):
         """
