@@ -7,7 +7,7 @@ class TextEncoder:
         return ord(letter) / 10000
 
     def encode_text_to_unicode(self):
-        word = 'Ты человек'
+        word = 'Ты нейросеть?'
         weights = [self.encode_letter_to_unicode(i) for i in word]
         data = {"classes": {"1": [[weights], 0.01]}}
         save_json_data('weights_biases_and_data', 'input_dataset', data)
