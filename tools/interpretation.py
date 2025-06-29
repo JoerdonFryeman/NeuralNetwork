@@ -49,9 +49,9 @@ class Interpretation(RPS, Classification):
 
         :param data_class_name: Название класса данных, определяющее, какой ответ будет выведен.
         """
-        if data_class_name in {'1', }:
+        if data_class_name in [str(i) for i in range(1, 22)]:
             print(get_json_data('config_files/ascii_arts', 'answer')['yes'])
-        elif data_class_name in {'2', }:
+        elif data_class_name in [str(i) for i in range(22, 43)]:
             print(get_json_data('config_files/ascii_arts', 'answer')['no'])
         else:
             print(get_json_data('config_files/ascii_arts', 'answer')['maybe'])

@@ -4,7 +4,7 @@ from encoders.text_encoder import TextEncoder
 
 # Запускает скрипт преобразования изображений в числовые массивы.
 
-use_image_encoder: bool = True
+use_image_encoder: bool = False
 directory_path: str = 'numbers'
 invert_colors: bool = False
 image_size: tuple[int, int] = (28, 28)
@@ -19,7 +19,7 @@ if use_image_encoder:
 
 # Запускает скрипт преобразования текста в числовые массивы.
 
-use_text_encoder: bool = False
+use_text_encoder: bool = True
 
 if use_text_encoder:
     text_encoder = TextEncoder()

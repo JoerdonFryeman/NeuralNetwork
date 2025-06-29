@@ -19,13 +19,13 @@ class Control:
         :param training (bool): Флаг режима обучения. По умолчанию False.
 
         :param init_func (str): Метод инициализации весов сети. По умолчанию 'xavier'.
-        :param epochs (int): Количество эпох обучения. По умолчанию 1000.
+        :param epochs (int): Количество эпох обучения. По умолчанию 100.
         :param learning_rate (float): Начальная скорость обучения. По умолчанию 0.001.
         :param learning_decay (float): Коэффициент уменьшения скорости обучения. По умолчанию 0.009.
         :param error_tolerance (float): Допустимый предел ошибок. По умолчанию 0.001.
         :param regularization (float): Коэффициент регуляризации. По умолчанию 0.001.
-        :param lasso_regularization (bool): Флаг использования L1 регуляризации. По умолчанию False.
-        :param ridge_regularization (bool): Флаг использования L2 регуляризации. По умолчанию True.
+        :param lasso_regularization (bool): Флаг использования L1 регуляризации. По умолчанию True.
+        :param ridge_regularization (bool): Флаг использования L2 регуляризации. По умолчанию False.
 
         :param visual (bool): Флаг режима визуализации. По умолчанию True.
         """
@@ -33,13 +33,13 @@ class Control:
         self.training: bool = False
 
         self.init_func: str = 'xavier'
-        self.epochs: int = 1000
+        self.epochs: int = 100
         self.learning_rate: float = 0.001
         self.learning_decay: float = 0.009
         self.error_tolerance: float = 0.001
         self.regularization: float = 0.001
-        self.lasso_regularization: bool = False
-        self.ridge_regularization: bool = True
+        self.lasso_regularization: bool = True
+        self.ridge_regularization: bool = False
 
         self.visual: bool = True
 

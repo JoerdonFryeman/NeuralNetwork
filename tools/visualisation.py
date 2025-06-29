@@ -17,7 +17,7 @@ class Visualisation(ActivationFunctions, Data, Interpretation):
         :param target: Целевое значение.
         :param layer: Объект слоя.
         """
-        if epoch % 50 == 0:
+        if epoch % 10 == 0:
             print(
                 f'Эпоха: {epoch}, ошибка: {calculate_error(prediction, target):.1f}%, '
                 f'прогноз: {prediction * 10:.4f}, результат: {sum(layer.get_layer_dataset()):.4f}'
@@ -59,4 +59,4 @@ class Visualisation(ActivationFunctions, Data, Interpretation):
 
         print(f'Слой: output_layer\nДанные: {output_layer:.10f}\n')
         print('Интерпретация данных:\n')
-        self.get_interpretation(float(f'{output_layer:.10f}'), self.get_number_visualisation)
+        self.get_interpretation(float(f'{output_layer:.10f}'), self.get_answer)
