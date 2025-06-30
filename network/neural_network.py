@@ -141,10 +141,10 @@ class NeuralNetwork(Train, ActivationFunctions, LayerBuilder):
         :return output_layer: Выходные данные.
         """
         hidden_layer_first = self._create_layer(
-            HiddenLayer, 'hidden_layer_first', self.input_dataset, 7, self.get_tanh
+            HiddenLayer, 'hidden_layer_first', self.input_dataset, 5, self.get_tanh
         )
         hidden_layer_second = self._create_layer(
-            HiddenLayer, 'hidden_layer_second', self._propagate(hidden_layer_first), 7, self.get_tanh
+            HiddenLayer, 'hidden_layer_second', self._propagate(hidden_layer_first), 20, self.get_tanh
         )
         output_layer = self.get_sigmoid(sum(self._propagate(hidden_layer_second)))
         # В режиме обучения запускается метод обучения слоёв на массиве данных.

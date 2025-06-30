@@ -29,7 +29,7 @@ class Control:
 
         :param visual (bool): Флаг режима визуализации. По умолчанию True.
         """
-        self.training_mode_message: bool = True
+        self.training_mode_message: bool = False
         self.training: bool = False
 
         self.init_func: str = 'xavier'
