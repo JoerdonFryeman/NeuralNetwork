@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, mock_open
 
-from config_files.configuration import get_json_data
+from base.base import get_json_data
 from data.data import Data
 from tools.support_functions import ActivationFunctions, InitializationFunctions
 
