@@ -1,6 +1,6 @@
 from pickle import load
 
-from config_files.configuration import logger
+from base.base import logger
 from machine_learning.train import Train
 from tools.support_functions import ActivationFunctions
 from .layers import LayerBuilder, HiddenLayer

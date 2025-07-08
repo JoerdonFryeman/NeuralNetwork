@@ -1,4 +1,4 @@
-from config_files.configuration import get_json_data, logger
+from base.base import get_json_data, logger
 
 
 class Classification:

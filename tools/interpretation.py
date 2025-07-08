@@ -1,9 +1,8 @@
-from config_files.configuration import get_json_data
+from base.base import get_json_data
 from data.classification import Classification
-from games.rps import RPS
 
 
-class Interpretation(RPS, Classification):
+class Interpretation(Classification):
     """Класс для интерпретации результатов нейронной сети."""
 
     @staticmethod
@@ -59,30 +58,6 @@ class Interpretation(RPS, Classification):
             print(get_json_data('config_files/ascii_arts', 'answer')['no'])
         else:
             print(get_json_data('config_files/ascii_arts', 'answer')['sorry'])
-
-    def get_rock_paper_scissors(self, data_class_name: str):
-        """
-        Определяет и выводит ответ нейронной сети для игры "Камень, ножницы, бумага".
-
-        :param data_class_name: Название класса данных, определяющее, какой ответ будет выведен.
-
-        :raises Exception: Если значение параметра data_class_name не соответствует ожидаемым значениям.
-        :return: Возвращает строку, представляющую выбранное действие ("Бумага", "Камень" или "Ножницы").
-        """
-        if data_class_name == '1':
-            print(f'Нейронная сеть отвечает: {get_json_data('config_files/ascii_arts', 'rps')['paper']}')
-            self.run_rps('Бумага')
-            return 'Бумага'
-        elif data_class_name == '2':
-            print(f'Нейронная сеть отвечает: {get_json_data('config_files/ascii_arts', 'rps')['rock']}')
-            self.run_rps('Камень')
-            return 'Камень'
-        elif data_class_name == '3':
-            print(f'Нейронная сеть отвечает: {get_json_data('config_files/ascii_arts', 'rps')['scissors']}')
-            self.run_rps('Ножницы')
-            return 'Ножницы'
-        else:
-            raise Exception('Не могу визуализировать значение результата!')
 
     def get_interpretation(self, output_layer: float, func: callable) -> None:
         """

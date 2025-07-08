@@ -1,4 +1,4 @@
-from config_files.configuration import get_json_data, save_json_data
+from base.base import get_json_data, save_json_data
 
 
 class Data:

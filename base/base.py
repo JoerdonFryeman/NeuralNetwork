@@ -5,9 +5,9 @@ from logging import config, getLogger
 
 # Создание необходимых директорий в случае их отсутствия.
 
-directories: tuple[str, str, str, str, str, str, str, str, str, str, str, str] = (
+directories: tuple[str, str, str, str, str, str, str, str, str, str, str] = (
     'weights_biases_and_data', 'tools', 'tests', 'temporary_files', 'network', 'machine_learning',
-    'learning_data', 'games', 'encoders', 'data', 'config_files', 'config_files/ascii_arts'
+    'learning_data', 'encoders', 'data', 'config_files', 'config_files/ascii_arts'
 )
 for d in directories:
     try:
@@ -35,7 +35,7 @@ def get_json_data(directory: str, name: str) -> dict:
         raise ValueError(f'Ошибка декодирования JSON в файле: {name}')
 
 
-def save_json_data(directory: str, name: str, data: dict[str, list[float]]) -> None:
+def save_json_data(directory: str, name: str, data: dict) -> None:
     """
     Сохраняет файл json.
 

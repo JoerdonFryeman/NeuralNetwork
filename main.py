@@ -1,13 +1,38 @@
-from config_files.base import select_os_command, logger
+from base.base import select_os_command, logger
 from data.data import Data
 from network.neural_network import NeuralNetwork
+from encoders.text_encoder import TextEncoder
 
 
-class Control:
+class Configuration:
+    @staticmethod
+    def enable_text_encoder(text_encoder: bool, target_mode: bool) -> None:
+        """Запускает скрипт преобразования текста в числовые массивы."""
+        if text_encoder:
+            text_encoder = TextEncoder(target_mode)
+            text_encoder.encode_sentence()
+
+    @staticmethod
+    def enable_image_encoder(image_encoder: bool, invert_colors: bool = False):
+        """Запускает скрипт преобразования изображений в числовые массивы."""
+        directory_path: str = 'numbers'
+        image_size: tuple[int, int] = (28, 28)
+
+        if image_encoder:
+            from encoders.image_encoder import ImageEncoder
+
+            image_encoder = ImageEncoder()
+            image_encoder.encode_images_from_directory(
+                f'learning_data/{directory_path}',
+                'weights_biases_and_data/input_dataset.json', invert_colors, image_size
+            )
+
+
+class Control(Configuration):
     """Класс управляет параметрами и характеристиками нейронной сети."""
 
     __slots__ = (
-        'training_mode_message', 'training', 'init_func', 'epochs', 'learning_rate', 'learning_decay',
+        'training', 'init_func', 'epochs', 'learning_rate', 'learning_decay',
         'error_tolerance', 'regularization', 'lasso_regularization', 'ridge_regularization', 'visual'
     )
 
@@ -15,7 +40,6 @@ class Control:
         """
         Инициализирует объект класса с параметрами по умолчанию.
 
-        :param training_mode_message (bool): Флаг сообщения активации режима обучения. По умолчанию True.
         :param training (bool): Флаг режима обучения. По умолчанию False.
 
         :param init_func (str): Метод инициализации весов сети. По умолчанию 'xavier'.
@@ -29,8 +53,10 @@ class Control:
 
         :param visual (bool): Флаг режима визуализации. По умолчанию True.
         """
-        self.training_mode_message: bool = False
         self.training: bool = False
+
+        self.enable_text_encoder(True, True)
+        self.enable_image_encoder(False)
 
         self.init_func: str = 'xavier'
         self.epochs: int = 100
@@ -97,8 +123,8 @@ def change_training_mode(training_mode: str) -> None:
 
 def main() -> None:
     """Запускающая все процессы главная функция."""
-    if control.training_mode_message:
-        change_training_mode(input('Активировать режим обучения?\n'))
+    if control.training:
+        change_training_mode(input('Внимание! Активирован режим обучения! Выполнить?\nДа/нет: '))
     try:
         if control.training:
             init_network()

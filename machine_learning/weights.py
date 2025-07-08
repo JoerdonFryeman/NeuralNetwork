@@ -1,7 +1,7 @@
 import os
 import pickle
 
-from config_files.configuration import logger
+from base.base import logger
 from .regularization import Regularization
 from .calculations import Calculations
 

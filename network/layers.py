@@ -1,6 +1,6 @@
 from random import uniform
 
-from config_files.configuration import logger
+from base.base import logger
 from tools.support_functions import InitializationFunctions
 
 
