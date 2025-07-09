@@ -48,11 +48,11 @@ class Interpretation(Classification):
 
         :param data_class_name: Название класса данных, определяющее, какой ответ будет выведен.
         """
-        if data_class_name in [str(i) for i in range(1, 41)]:
+        if data_class_name == '1':
             print(get_json_data('config_files/ascii_arts', 'answer')['yes'])
-        elif data_class_name in [str(i) for i in range(41, 81)]:
+        elif data_class_name == '2':
             print(get_json_data('config_files/ascii_arts', 'answer')['hmm'])
-        elif data_class_name in [str(i) for i in range(81, 121)]:
+        elif data_class_name == '3':
             print(get_json_data('config_files/ascii_arts', 'answer')['no'])
         else:
             print(get_json_data('config_files/ascii_arts', 'answer')['sorry'])

@@ -41,9 +41,9 @@ class Train(Visualisation, Weights, Data):
             layer.input_dataset = self.get_data_sample(self.serial_class_number, self.serial_data_number)
             prediction: float = sum(layer.get_layer_dataset())
             target: float = self._get_target(data_key)
-            gradient: float = prediction - target
+            loss: float = prediction - target
             self._update_weights(
-                layer, gradient, lasso_regularization, ridge_regularization, learning_rate, regularization
+                layer, loss, lasso_regularization, ridge_regularization, learning_rate, regularization
             )
             self.get_train_visualisation(epoch, self._calculate_error, prediction, target, layer)
             learning_rate = self._calculate_learning_decay(epoch, epochs, learning_rate, learning_decay)
