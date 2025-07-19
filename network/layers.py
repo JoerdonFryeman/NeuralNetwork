@@ -26,11 +26,11 @@ class LayerBuilder(InitializationFunctions):
 
         :return: Список значений, вычисленных для каждого нейрона после применения функции активации.
         """
-        activated_output_sum = []
+        activated_output = []
         for neuron in range(neuron_number):
-            weighted_signals_and_bias = sum(i * n for i, n in zip(input_dataset, weights[neuron])) + bias
-            activated_output_sum.append(act_func(weighted_signals_and_bias))
-        return activated_output_sum
+            weighted_sum_and_bias = sum(i * n for i, n in zip(input_dataset, weights[neuron])) + bias
+            activated_output.append(act_func(weighted_sum_and_bias))
+        return activated_output
 
     def _select_init_func(
             self, init_func: str, input_size: int = None, neuron_number: int = None, for_bias: bool = False
