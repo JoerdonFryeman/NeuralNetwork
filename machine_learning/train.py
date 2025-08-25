@@ -42,13 +42,18 @@ class Train(Visualisation, Weights, Data):
             prediction: float = sum(layer.get_layer_dataset())
             target: float = self._get_target(data_key)
             loss: float = prediction - target
+
             self._update_weights(
                 layer, loss, lasso_regularization, ridge_regularization, learning_rate, regularization
             )
-            self.get_train_visualisation(epoch, self._calculate_error, prediction, target, layer)
-            learning_rate = self._calculate_learning_decay(epoch, epochs, learning_rate, learning_decay)
+            self.get_train_visualisation(epoch, prediction, target, layer)
+
+            if epoch % (epochs // 4) == 0 and epoch != 0:
+                learning_rate *= learning_decay
+
             if abs(prediction - target) < error_tolerance:
                 return layer.weights, layer.bias
+
         return layer.weights, layer.bias
 
     def train_layers_on_dataset(

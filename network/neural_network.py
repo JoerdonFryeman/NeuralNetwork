@@ -23,7 +23,7 @@ class NeuralNetwork(Train, ActivationFunctions, LayerBuilder):
         super().__init__()
         self.training: bool = training
         self.init_func: str = init_func
-        self.input_dataset: list[int | float] = self._validate_input_dataset(input_dataset)
+        self.input_dataset: list[float] = input_dataset
         self.layers: dict[str, object] = {}
 
     @staticmethod
@@ -39,26 +39,7 @@ class NeuralNetwork(Train, ActivationFunctions, LayerBuilder):
         return data
 
     @staticmethod
-    def _validate_input_dataset(input_dataset: list) -> list[int | float]:
-        """
-        Проверяет корректность входных данных.
-        Входные данные считаются корректными, если они представлены в виде списка.
-
-        :param input_dataset: Список входных данных, который нужно проверить на корректность.
-
-        :return: Проверенный список входных данных.
-        :raises ValueError: Если входные данные некорректны.
-        """
-        # Входные данные считаются корректными, если они представлены в виде списка.
-        if not isinstance(input_dataset, list):
-            raise ValueError(f'Значение "{input_dataset}" должно быть списком!')
-        # Если все элементы списка являются целыми числами (int) или вещественными числами (float).
-        if not all(isinstance(x, (int, float)) for x in input_dataset):
-            raise ValueError(f'Все элементы списка "{input_dataset}" должны быть целыми или вещественными числами!')
-        return input_dataset
-
-    @staticmethod
-    def _propagate(layer) -> list[int | float]:
+    def _propagate(layer) -> list[float]:
         """
         Пропускает данные через слой и возвращает результаты.
         Метод вызывает get_layer_dataset() у переданного объекта слоя и возвращает результаты.
@@ -84,7 +65,7 @@ class NeuralNetwork(Train, ActivationFunctions, LayerBuilder):
         self.layers[name] = layer
 
     def _create_layer(
-            self, layer_class, layer_name: str, input_dataset: list[int | float], neuron_number: int, act_func: callable
+            self, layer_class, layer_name: str, input_dataset: list[float], neuron_number: int, act_func
     ):
         """
         Вспомогательный метод для создания и добавления слоя.
@@ -101,7 +82,6 @@ class NeuralNetwork(Train, ActivationFunctions, LayerBuilder):
         :return: Созданный объект слоя
         """
         try:
-            # Пытается загрузить веса и смещения из файла.
             data: dict = self._load_weights_and_biases('weights_biases_and_data/weights_and_biases.pkl')
             logger.info(f'Веса и смещения для слоя "{layer_name}" успешно загружены и установлены.')
         except FileNotFoundError:
@@ -110,12 +90,9 @@ class NeuralNetwork(Train, ActivationFunctions, LayerBuilder):
 
         weights: list[list[float]] = data['weights'].get(layer_name)
         bias: float = data['biases'].get(layer_name)
-        # Создаётся объект слоя, инициализируя его текущими весами и смещениями.
         layer = layer_class(self.training, self.init_func, input_dataset, weights, bias, neuron_number, act_func)
-        # Созданный слой добавляется в нейронную сеть.
         self._add_layer(layer_name, layer)
         logger.debug(f'Слой "{layer_name}" создан с параметрами: {layer}')
-        # Возвращается объект созданного слоя, который теперь является частью архитектуры нейронной сети.
         return layer
 
     def build_neural_network(
@@ -141,18 +118,18 @@ class NeuralNetwork(Train, ActivationFunctions, LayerBuilder):
         :return output_layer: Выходные данные.
         """
         hidden_layer_first = self._create_layer(
-            HiddenLayer, 'hidden_layer_first', self.input_dataset, 5, self.get_tanh
+            HiddenLayer, 'hidden_layer_first', self.input_dataset, 4, self.get_tanh
         )
         hidden_layer_second = self._create_layer(
-            HiddenLayer, 'hidden_layer_second', self._propagate(hidden_layer_first), 20, self.get_tanh
+            HiddenLayer, 'hidden_layer_second', self._propagate(hidden_layer_first), 16, self.get_tanh
         )
         output_layer = self.get_sigmoid(sum(self._propagate(hidden_layer_second)))
-        # В режиме обучения запускается метод обучения слоёв на массиве данных.
+
         if self.training:
             self.train_layers_on_dataset(
                 hidden_layer_first, hidden_layer_second, epochs, learning_rate, learning_decay,
                 error_tolerance, regularization, lasso_regularization, ridge_regularization
             )
             logger.info('Обучение нейронной сети завершено.')
-        # Возвращается результат в виде вещественного числа в десятичной системе счисления.
+
         return float(f'{output_layer:.10f}')

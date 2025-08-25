@@ -1,79 +1,10 @@
-class ActivationFunctions:
-    """Класс реализации различных активационных функций."""
+class SupportFunctions:
+    @staticmethod
+    def calculate_average(value: list[float]) -> float:
+        return sum(value) / len(value)
 
     @staticmethod
-    def get_linear(x: float) -> float:
-        """
-        Линейная активационная функция.
-
-        :param x: Входное значение.
-        :return: То же входное значение.
-        """
-        return x
-
-    @staticmethod
-    def get_relu(x: float) -> float:
-        """
-        ReLU (Rectified Linear Unit) активационная функция.
-
-        :param x: Входное значение.
-        :return: Максимум между нулем и входным значением.
-        """
-        return max(0.0, x)
-
-    @staticmethod
-    def get_sigmoid(x: float) -> float:
-        """
-        Сигмоидная активационная функция.
-
-        :param x: Входное значение.
-        :return: Значение сигмоидной функции для входного значения.
-        """
-        exp: float = 1.0
-
-        for i in range(10, 0, -1):
-            exp = 1 + x * exp / i
-        return 1 / (1 + exp)
-
-    @staticmethod
-    def get_tanh(x: float) -> float:
-        """
-        Активационная функция гиперболический тангенс (tanh).
-
-        :param x: Входное значение.
-        :return: Значение функции tanh для входного значения.
-        """
-        exp_pos_2x: float = 1.0
-        exp_neg_2x: float = 1.0
-
-        for i in range(1, 11):
-            exp_pos_2x *= (2 * x) / i + 1
-            exp_neg_2x *= (2 * -x) / i + 1
-
-        return (exp_pos_2x - exp_neg_2x) / (exp_pos_2x + exp_neg_2x)
-
-    @staticmethod
-    def get_leaky_relu(x: float, alpha: float = 0.01) -> float:
-        """
-        Leaky ReLU активационная функция.
-
-        :param x: Входное значение.
-        :param alpha: Сила утечки (по умолчанию 0.01).
-
-        :return: Максимум между alpha*x и входным значением.
-        """
-        return x if x > 0 else alpha * x
-
-    @staticmethod
-    def __exp(x: float, terms: int = 20) -> float:
-        """
-        Вычисляет экспоненту числа x с помощью ряда Тейлора.
-
-        :param x: Входное значение.
-        :param terms: Количество членов ряда (по умолчанию 20).
-
-        :return: Значение exp(x).
-        """
+    def exp(x: float, terms: int = 20) -> float:
         result: float = 1.0
         factorial: float = 1.0
         power: float = 1.0
@@ -84,70 +15,86 @@ class ActivationFunctions:
             result += power / factorial
         return result
 
+    @staticmethod
+    def get_relu_derivative(x: float) -> float:
+        return 1.0 if x > 0 else 0.0
+
+    @staticmethod
+    def get_leaky_relu_derivative(x: float, alpha: float = 0.01) -> float:
+        return 1.0 if x > 0 else alpha
+
+    def get_elu_derivative(self, x: list[float], i: int, alpha=1.0) -> float:
+        return 1 if x[i] > 0 else alpha * self.exp(x[i])
+
+    @staticmethod
+    def get_sigmoid_derivative(sigmoid, x: float) -> float:
+        sigmoid_value = sigmoid(x)
+        return sigmoid_value * (1 - sigmoid_value)
+
+    @staticmethod
+    def get_tanh_derivative(tanh, x: float) -> float:
+        return 1 - tanh(x) ** 2
+
+
+class ActivationFunctions(SupportFunctions):
+
+    @staticmethod
+    def get_relu(x: float) -> float:
+        return max(0.0, x)
+
+    @staticmethod
+    def get_leaky_relu(x: float, alpha: float = 0.01) -> float:
+        return x if x > 0 else alpha * x
+
     def get_elu(self, x: float, alpha: float = 1.0) -> float:
-        """
-        ELU (Exponential Linear Unit) активационная функция.
+        return x if x >= 0 else alpha * (self.exp(x) - 1)
 
-        :param x: Входное значение.
-        :param alpha: Параметр альфа (по умолчанию 1.0).
+    @staticmethod
+    def get_sigmoid(x: float) -> float:
+        exp: float = 1.0
 
-        :return: ELU от входного значения.
-        """
-        return x if x >= 0 else alpha * (self.__exp(x) - 1)
+        for i in range(10, 0, -1):
+            exp = 1 + x * exp / i
+        return 1 / (1 + exp)
 
-    def get_softmax(self, x: float | list[float]) -> list[float]:
-        """
-        Softmax активационная функция.
+    @staticmethod
+    def get_tanh(x: float) -> float:
+        exp_pos_2x: float = 1.0
+        exp_neg_2x: float = 1.0
 
-        :param x: Входное значение (может быть списком или отдельным числом).
-        :return: Softmax распределение значений.
-        """
-        if isinstance(x, (float, int)):
-            x = [x]
-        max_val = max(x)
-        exp_values: list[float] = [self.__exp(i - max_val) for i in x]
+        for i in range(1, 11):
+            exp_pos_2x *= (2 * x) / i + 1
+            exp_neg_2x *= (2 * -x) / i + 1
+
+        return (exp_pos_2x - exp_neg_2x) / (exp_pos_2x + exp_neg_2x)
+
+
+class NormalizationFunctions(SupportFunctions):
+
+    @staticmethod
+    def normalize_min_max(value: int, min_val: int | float, max_val: int | float) -> float:
+        if min_val == max_val:
+            return value / (value * value)
+        return (value - min_val) / (max_val - min_val)
+
+    def get_softmax(self, x: list[float]) -> list[float]:
+        exp_values: list[float] = [self.exp(i - max(x)) for i in x]
         sum_exp: float = sum(exp_values)
         return [i / sum_exp for i in exp_values]
 
 
 class InitializationFunctions:
-    """Класс содержит методы инициализации весов нейронных сетей."""
 
     @staticmethod
     def get_uniform(value: float = 0.5) -> tuple[float, float]:
-        """
-        Возвращает границы диапазона для равномерной инициализации.
-
-        :param value: Граница диапазона.
-        :return: Кортеж с границами диапазона.
-        """
         return -value, value
 
     @staticmethod
     def get_xavier(input_size: int, output_size: int) -> tuple[float, float]:
-        """
-        Функция инициализации Ксавьер.
-
-        Вычисляется граница диапазона как квадратный корень из 6,
-        деленного на сумму количества входных и выходных нейронов.
-
-        :param input_size: Количество входных нейронов.
-        :param output_size: Количество выходных нейронов.
-
-        :return: Кортеж с границами диапазона для инициализации весов.
-        """
         limit: float = (6 / (input_size + output_size)) ** 0.5
         return -limit, limit
 
     @staticmethod
     def get_he(input_size: int) -> tuple[float, float]:
-        """
-        Функция инициализации He.
-
-        Вычисляется граница диапазона как квадратный корень из 2, деленного на количество входных нейронов.
-
-        :param input_size: Количество входных нейронов.
-        :return: Кортеж с границами диапазона для инициализации весов.
-        """
         limit: float = (2 / input_size) ** 0.5
         return -limit, limit

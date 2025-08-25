@@ -3,18 +3,6 @@ import json
 from platform import system
 from logging import config, getLogger
 
-# Создание необходимых директорий в случае их отсутствия.
-
-directories: tuple[str, str, str, str, str, str, str, str, str, str, str] = (
-    'weights_biases_and_data', 'tools', 'tests', 'temporary_files', 'network', 'machine_learning',
-    'learning_data', 'encoders', 'data', 'config_files', 'config_files/ascii_arts'
-)
-for d in directories:
-    try:
-        os.mkdir(d)
-    except FileExistsError:
-        pass
-
 
 def get_json_data(directory: str, name: str) -> dict:
     """
@@ -23,19 +11,23 @@ def get_json_data(directory: str, name: str) -> dict:
     :param directory: Название каталога.
     :param name: Имя файла без расширения.
     :return: Словарь с данными из json файла.
-    :raises FileNotFoundError: Если файл не найден.
     """
+    file_path = os.path.join(directory, f'{name}.json')
     try:
-        with open(f'{directory}/{name}.json', encoding='UTF-8') as json_file:
+        with open(file_path, encoding='UTF-8') as json_file:
             data = json.load(json_file)
         return data
     except FileNotFoundError:
-        raise FileNotFoundError('Файл не найден!')
+        raise FileNotFoundError(f'Файл не найден: {file_path}')
     except json.JSONDecodeError:
-        raise ValueError(f'Ошибка декодирования JSON в файле: {name}')
+        raise ValueError(f'Ошибка декодирования JSON в файле: {file_path}')
+    except PermissionError:
+        raise PermissionError(f'Нет доступа к файлу: {file_path}')
+    except Exception as e:
+        raise Exception(f'Произошла ошибка: {str(e)}')
 
 
-def save_json_data(directory: str, name: str, data: dict) -> None:
+def save_json_data(directory: str, name: str, data: list | dict) -> None:
     """
     Сохраняет файл json.
 
@@ -43,8 +35,16 @@ def save_json_data(directory: str, name: str, data: dict) -> None:
     :param name: Имя сохраняемого файла.
     :param data: Данные сохраняемого файла.
     """
-    with open(f'{directory}/{name}.json', 'w') as json_file:
-        json.dump(data, json_file, indent=4)
+    file_path = os.path.join(directory, f'{name}.json')
+    try:
+        with open(file_path, 'w', encoding='UTF-8') as json_file:
+            json.dump(data, json_file, ensure_ascii=False, indent=4)
+    except PermissionError:
+        raise PermissionError(f'Нет доступа для записи в файл: {file_path}')
+    except IOError as e:
+        raise IOError(f'Ошибка записи в файл: {file_path}. Причина: {str(e)}')
+    except Exception as e:
+        raise Exception(f'Произошла ошибка: {str(e)}')
 
 
 def select_os_command(command: str):

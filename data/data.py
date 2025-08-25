@@ -43,7 +43,7 @@ class Data:
         """
         return dict(enumerate(self.dataset[self.data_name].get(str(serial_class_number), [])[0], 1))
 
-    def get_data_sample(self, serial_class_number: int, serial_data_number: int) -> any:
+    def get_data_sample(self, serial_class_number: int, serial_data_number: int):
         """
         Возвращает данные для текущего изображения.
 
@@ -66,11 +66,8 @@ class Data:
         """
         output_layer_data: dict[str, list[float]] = {}
         serial_class_number: int = self.get_data_dict_value('serial_class_number')
-        # Прохождение по индексам от 0 до значения serial_class_number.
+
         for i in range(serial_class_number):
-            # Для каждого индекса i создаётся ключ в словаре (строка от "1" до значения serial_class_number).
-            # Далее он заполняется значениями, полученными с помощью среза.
-            # output_data[i::serial_class_number] где выбираются элементы, начиная с i и шагом со значением serial_class_number.
             if file_exist:
                 output_layer_data[str(i + 1)] = output_layer[i::serial_class_number]
             else:
@@ -84,8 +81,8 @@ class Data:
         :param init_network: Ссылка на функцию инициализации нейросети.
         :param training_mode: Флаг режима обучения.
         """
-        output_layer_data: list[int | float] = []
-        # В циклах, равных количеству данных в классе и количеству самих классов, загружаются выходные данные.
+        output_layer_data: list[float] = []
+
         for _ in range(self.get_data_dict_value('serial_data_number')):
             for _ in range(self.get_data_dict_value('serial_class_number')):
                 result: int | float = init_network()
@@ -93,6 +90,6 @@ class Data:
                 self.serial_class_number += 1
             self.serial_class_number: int = 1
             self.serial_data_number += 1
-        # В режиме обучения запускается метод создания словаря входных данных.
+
         if training_mode:
             self.create_output_layer_data(output_layer_data)

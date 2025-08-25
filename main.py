@@ -6,14 +6,14 @@ from encoders.text_encoder import TextEncoder
 
 class Configuration:
     @staticmethod
-    def enable_text_encoder(text_encoder: bool, target_mode: bool) -> None:
+    def use_text_encoder(text_encoder: bool, target_mode: bool) -> None:
         """Запускает скрипт преобразования текста в числовые массивы."""
         if text_encoder:
             text_encoder = TextEncoder(target_mode)
             text_encoder.encode_sentence()
 
     @staticmethod
-    def enable_image_encoder(image_encoder: bool, invert_colors: bool = False):
+    def use_image_encoder(image_encoder: bool, invert_colors: bool = False) -> None:
         """Запускает скрипт преобразования изображений в числовые массивы."""
         directory_path: str = 'numbers'
         image_size: tuple[int, int] = (28, 28)
@@ -32,8 +32,8 @@ class Control(Configuration):
     """Класс управляет параметрами и характеристиками нейронной сети."""
 
     __slots__ = (
-        'training', 'init_func', 'epochs', 'learning_rate', 'learning_decay',
-        'error_tolerance', 'regularization', 'lasso_regularization', 'ridge_regularization', 'visual'
+        'training', 'init_func', 'epochs', 'learning_rate', 'learning_decay', 'error_tolerance',
+        'regularization', 'lasso_regularization', 'ridge_regularization', 'visual'
     )
 
     def __init__(self):
@@ -48,15 +48,15 @@ class Control(Configuration):
         :param learning_decay (float): Коэффициент уменьшения скорости обучения. По умолчанию 0.009.
         :param error_tolerance (float): Допустимый предел ошибок. По умолчанию 0.001.
         :param regularization (float): Коэффициент регуляризации. По умолчанию 0.001.
-        :param lasso_regularization (bool): Флаг использования L1 регуляризации. По умолчанию True.
-        :param ridge_regularization (bool): Флаг использования L2 регуляризации. По умолчанию False.
+        :param lasso_regularization (bool): Флаг использования L1 регуляризации. По умолчанию False.
+        :param ridge_regularization (bool): Флаг использования L2 регуляризации. По умолчанию True.
 
         :param visual (bool): Флаг режима визуализации. По умолчанию True.
         """
-        self.training: bool = False
+        self.training: bool = True
 
-        self.enable_text_encoder(True, True)
-        self.enable_image_encoder(False)
+        self.use_text_encoder(True, True)
+        self.use_image_encoder(False)
 
         self.init_func: str = 'xavier'
         self.epochs: int = 100
@@ -64,8 +64,8 @@ class Control(Configuration):
         self.learning_decay: float = 0.009
         self.error_tolerance: float = 0.001
         self.regularization: float = 0.001
-        self.lasso_regularization: bool = True
-        self.ridge_regularization: bool = False
+        self.lasso_regularization: bool = False
+        self.ridge_regularization: bool = True
 
         self.visual: bool = True
 

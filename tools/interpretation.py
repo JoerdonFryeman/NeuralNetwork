@@ -48,16 +48,18 @@ class Interpretation(Classification):
 
         :param data_class_name: Название класса данных, определяющее, какой ответ будет выведен.
         """
-        if data_class_name == '1':
-            print(get_json_data('config_files/ascii_arts', 'answer')['yes'])
-        elif data_class_name == '2':
-            print(get_json_data('config_files/ascii_arts', 'answer')['hmm'])
-        elif data_class_name == '3':
-            print(get_json_data('config_files/ascii_arts', 'answer')['no'])
-        else:
-            print(get_json_data('config_files/ascii_arts', 'answer')['sorry'])
+        data_number = len(get_json_data('weights_biases_and_data', 'output_layer_data')) // 3
 
-    def get_interpretation(self, output_layer: float, func: callable) -> None:
+        if data_class_name in [str(i) for i in range(1, data_number + 1)]:
+            print(f"\n{get_json_data('config_files/ascii_arts', 'answer')['yes']}")
+        elif data_class_name in [str(i) for i in range(data_number + 1, data_number * 2 + 1)]:
+            print(f"\n{get_json_data('config_files/ascii_arts', 'answer')['hmm']}")
+        elif data_class_name in [str(i) for i in range(data_number * 2 + 1, data_number * 3 + 1)]:
+            print(f"\n{get_json_data('config_files/ascii_arts', 'answer')['no']}")
+        else:
+            print(f"\n{get_json_data('config_files/ascii_arts', 'answer')['sorry']}")
+
+    def get_interpretation(self, output_layer: float, func) -> None:
         """
         Интерпретирует значение результата и вызывает переданную функцию.
 

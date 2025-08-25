@@ -12,8 +12,7 @@ class LayerBuilder(InitializationFunctions):
 
     @staticmethod
     def calculate_neuron_dataset(
-            input_dataset: list[int | float], weights: list[list[int | float]], bias: float,
-            neuron_number: int, act_func: callable
+            input_dataset: list[float], weights: list[list[float]], bias: float, neuron_number: int, act_func
     ) -> list[float]:
         """
         Вычисляет выходные данные для заданного количества нейронов на основе входных данных и весов.
@@ -46,7 +45,6 @@ class LayerBuilder(InitializationFunctions):
         :return: Инициализированное значение или кортеж инициализированных значений в зависимости от выбранного метода.
         :raises ValueError: Выбрасывается, если init_func не соответствует ни одному из поддерживаемых методов инициализации.
         """
-        # Если параметр for_bias установлен в True, возвращается нулевое смещение, так как смещение не требует особой инициализации.
         if for_bias:
             return 0.0
 
@@ -74,14 +72,10 @@ class LayerBuilder(InitializationFunctions):
 
         :return: Список инициализированных весов, если текущий режим обучения или веса отсутствуют. В противном случае возвращает переданные веса.
         """
-        # Проверяет, находится ли модель в режиме обучения или установлены ли веса.
         if training or not weights:
             logger.info(f'Инициализация весов для входных данных размером {input_size} и {neuron_number} нейронов.')
-            # Получение пределов инициализации, вызывается select_init_func с соответствующими параметрами.
             limits: float | tuple[float, float] = self._select_init_func(init_func, input_size, neuron_number)
-            # Создаёт и возвращает двумерный список весов, используя переданные пределы для каждого нейрона.
             return [[uniform(*limits) for _ in range(input_size)] for _ in range(neuron_number)]
-        # Если веса уже установлены и модель не в режиме обучения, возвращает существующие веса.
         return weights
 
     def select_bias_mode(self, training: bool, init_func: str, bias: float) -> float | tuple[float, float]:
@@ -96,14 +90,10 @@ class LayerBuilder(InitializationFunctions):
         """
         if training or not bias:
             logger.info(f'Инициализация смещений.')
-            # Получает пределы инициализации, вызывая select_init_func с параметром for_bias, который равен True, если метод инициализации не 'uniform'.
             limits: tuple[float, float] = self._select_init_func(init_func, for_bias=(init_func != 'uniform'))
-            # Если метод инициализации 'uniform', возвращает случайное число внутри полученных пределов.
             if init_func == 'uniform':
                 return uniform(*limits)
-            # Для других методов возвращает сами пределы.
             return limits
-        # Если смещение уже задано и модель не в режиме обучения, возвращает текущее смещение.
         return bias
 
 
@@ -113,16 +103,16 @@ class HiddenLayer(LayerBuilder):
     __slots__ = ('input_dataset', 'weights', 'bias', 'neuron_number', 'act_func')
 
     def __init__(
-            self, training, init_func, input_dataset: list[int | float], weights: list[list[float]], bias: float,
-            neuron_number: int, act_func: callable
+            self, training, init_func, input_dataset: list[float], weights: list[list[float]], bias: float,
+            neuron_number: int, act_func
     ):
-        self.input_dataset: list[int | float] = input_dataset
+        self.input_dataset: list[float] = input_dataset
         self.weights: list[list[float]] = self.select_weights_mode(
             training, init_func, len(input_dataset), weights, neuron_number
         )
         self.bias: float | tuple[float, float] = self.select_bias_mode(training, init_func, bias)
         self.neuron_number: int = neuron_number
-        self.act_func: callable = act_func
+        self.act_func = act_func
 
     def get_layer_dataset(self) -> list[float]:
         """

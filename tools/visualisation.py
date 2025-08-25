@@ -7,11 +7,10 @@ class Visualisation(ActivationFunctions, Data, Interpretation):
     """Класс содержит методы визуализации процесса обучения и результатов работы нейронной сети."""
 
     @staticmethod
-    def get_train_visualisation(epoch, calculate_error, prediction, target, layer) -> None:
+    def get_train_visualisation(epoch, prediction, target, layer) -> None:
         """
         Выводит визуализацию процесса обучения.
 
-        :param calculate_error: Метод вычисления ошибки.
         :param epoch: Эпоха.
         :param prediction: Предсказанное значение.
         :param target: Целевое значение.
@@ -19,7 +18,7 @@ class Visualisation(ActivationFunctions, Data, Interpretation):
         """
         if epoch % 10 == 0:
             print(
-                f'Эпоха: {epoch}, ошибка: {calculate_error(prediction, target):.1f}%, '
+                f'Эпоха: {epoch}, ошибка: {((prediction - target) / target) * 100:.1f}%, '
                 f'прогноз: {prediction * 10:.4f}, результат: {sum(layer.get_layer_dataset()):.4f}'
             )
 
@@ -37,7 +36,7 @@ class Visualisation(ActivationFunctions, Data, Interpretation):
         )
 
     def get_info_visualisation(
-            self, input_dataset: list[int | float], layers: dict, output_layer: float
+            self, input_dataset: list[float], layers: dict, output_layer: float
     ) -> None:
         """
         Выводит визуальное представление нейронной сети и результат.

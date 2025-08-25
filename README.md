@@ -52,8 +52,6 @@
 - `encoders/text_encoder.py`: Кодирующий текст в массивы данных скрипт.
 - `learning_data/numbers.zip`: Небольшой массив изображений для тестового обучения.
 - `learning_data/text.zip`: Небольшой массив текстовых данных для тестового обучения.
-- `machine_learning/calculations.py`: Модуль для связанных с вычислениями методов.
-- `machine_learning/regularization.py`: Модуль для методов регуляризации.
 - `machine_learning/train.py`: Модуль для выполнения основного процесса машинного обучения.
 - `machine_learning/weights.py`: Модуль для обновления и сохранения весов.
 - `network/layers.py`: Модуль для создания слоёв нейронной сети.
