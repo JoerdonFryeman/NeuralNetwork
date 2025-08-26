@@ -2,9 +2,10 @@ import os
 import pickle
 
 from base.base import logger
+from tools.support_functions import ActivationFunctions
 
 
-class Weights:
+class Weights(ActivationFunctions):
     @staticmethod
     def _save_weights_and_biases(
             directory: str, name: str, weights: dict[str, list[list[float]]], biases: dict[str, list[float]]
@@ -29,13 +30,12 @@ class Weights:
         except Exception as e:
             logger.error(f'Произошла ошибка: {e}')
 
-    @staticmethod
     def _update_weights(
-            layer, losses: float, lasso_regularization: bool,
+            self, layer, losses: float, lasso_regularization: bool,
             ridge_regularization: bool, learning_rate: float, regularization: float
     ) -> None:
         """
-        Обновляет веса слоя с использованием заданных параметров Elastic Net регуляризации.
+        Вычисляет градиент и обновляет веса слоя с использованием заданных параметров Elastic Net регуляризации.
 
         :param layer: Объект слоя.
         :param losses: Результат работы функции потерь.
@@ -53,9 +53,11 @@ class Weights:
                 if ridge_regularization:
                     regularization_term += regularization * layer.weights[i][j]
 
+                gradient = losses * self.get_tanh_derivative(self.get_tanh, layer.input_dataset[j])
+
                 if lasso_regularization or ridge_regularization:
-                    layer.weights[i][j] -= learning_rate * (losses * layer.input_dataset[j] + regularization_term)
+                    layer.weights[i][j] -= learning_rate * (gradient + regularization_term)
                 else:
-                    layer.weights[i][j] -= learning_rate * losses * layer.input_dataset[j]
+                    layer.weights[i][j] -= learning_rate * gradient
 
         layer.bias -= learning_rate * losses
