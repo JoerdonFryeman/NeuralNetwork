@@ -72,5 +72,13 @@ def get_method_info(cls, key: str):
     )
 
 
+directories: tuple[str, str] = ('weights_biases_and_data', 'temporary_files')
+
+for d in directories:
+    try:
+        os.mkdir(d)
+    except FileExistsError:
+        pass
+
 config.dictConfig(get_json_data('config_files', 'logging'))
 logger = getLogger()
